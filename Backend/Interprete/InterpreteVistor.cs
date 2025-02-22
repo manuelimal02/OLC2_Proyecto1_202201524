@@ -9,6 +9,20 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWapper>
 
     private ValorWapper ValorVoid = new ValorVoid();
 
+    private string ObtenerValor(ValorWapper valor)
+    {
+        return valor switch
+        {
+            ValorInt v => v.Valor.ToString(),
+            ValorFloat64 v => v.Valor.ToString(),
+            ValorString v => v.Valor,
+            ValorBoolean v => v.Valor.ToString(),
+            ValorRune v => v.Valor.ToString(),
+            ValorVoid v => "void",
+            _ => throw new ArgumentException("Tipo de valor no soportado")
+        };
+    }
+
     // VisitProgram
     public override ValorWapper VisitProgram(LanguageParser.ProgramContext context)
     {
@@ -34,7 +48,8 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWapper>
     // VisitCadena
     public override ValorWapper VisitCadena(LanguageParser.CadenaContext context)
     {
-        return new ValorString(context.CADENA().GetText().ToString());
+        string cadena = context.CADENA().GetText();
+        return new ValorString(cadena.Substring(1, cadena.Length - 2));
     }
 
     // VisitBooleano
@@ -63,7 +78,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWapper>
 
         if (valor is ValorInt && tipo != "int"){
             Salida += "Tipo de Dato NO Coincide con el Valor:";
-            
         } else if (valor is ValorFloat64 && tipo != "float64"){
             Salida += "Tipo de Dato NO Coincide con el Valor:";
         } else if (valor is ValorString && tipo != "string"){
@@ -113,6 +127,22 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWapper>
             }
         return ValorVoid;
     }
+
+    // VisitFuncionEmbebidaPrintln
+    public override ValorWapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)
+    {
+    List<string> valores = new List<string>();
+
+    foreach (var expre in context.expresion())
+    {
+        ValorWapper valor = Visit(expre);
+        valores.Add(ObtenerValor(valor)); 
+    }
+
+    Salida += string.Join(" ", valores) + "\n";
+    return ValorVoid;
+    }
+
 
     // VisitDeclaraciones
     // VisitParentesis

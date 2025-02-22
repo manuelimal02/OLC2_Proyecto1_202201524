@@ -11,7 +11,8 @@ declaracion_variable: 'var' IDENTIFICADOR TIPO '=' expresion (';')? # Declaracio
 	;
 
 sentencia: expresion ';' # ExprStmt 
-		;
+	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  # FuncionEmbebidaPrintln
+	;
 
 expresion:
 	'-' expresion						# RestaUnaria

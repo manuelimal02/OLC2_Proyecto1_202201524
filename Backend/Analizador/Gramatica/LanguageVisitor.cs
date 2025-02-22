@@ -73,6 +73,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitExprStmt([NotNull] LanguageParser.ExprStmtContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaPrintln</c>
+	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaPrintln([NotNull] LanguageParser.FuncionEmbebidaPrintlnContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>Caracter</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
