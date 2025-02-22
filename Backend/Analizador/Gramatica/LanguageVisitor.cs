@@ -108,20 +108,6 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitEntero([NotNull] LanguageParser.EnteroContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>MulDiv</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitMulDiv([NotNull] LanguageParser.MulDivContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>AddSub</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAddSub([NotNull] LanguageParser.AddSubContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>Parentesis</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
@@ -135,6 +121,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitCadena([NotNull] LanguageParser.CadenaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>MultiplicacionDivision</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMultiplicacionDivision([NotNull] LanguageParser.MultiplicacionDivisionContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>RestaUnaria</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
@@ -156,5 +149,12 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitIdentificador([NotNull] LanguageParser.IdentificadorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>SumaResta</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSumaResta([NotNull] LanguageParser.SumaRestaContext context);
 }
 } // namespace Analizador

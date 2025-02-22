@@ -24,6 +24,20 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         };
     }
 
+    private string GetTipoValor(ValorWrapper valor)
+    {
+        return valor switch
+        {
+            ValorInt _ => "int",
+            ValorFloat64 _ => "float64",
+            ValorString _ => "string",
+            ValorBoolean _ => "bool",
+            ValorRune _ => "rune",
+            ValorVoid _ => "void",
+            _ => throw new ArgumentException("Tipo de valor no soportado")
+        };
+    }
+
     // VisitProgram
     public override ValorWrapper VisitProgram(LanguageParser.ProgramContext context)
     {
@@ -91,20 +105,24 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper valor = Visit(context.expresion());
         string tipo = context.TIPO().GetText();
 
-        if (valor is ValorInt && tipo != "int"){
-            Salida += "Tipo de Dato NO Coincide con el Valor:";
+        if (valor is ValorInt && tipo == "float64"){
+            valor = new ValorFloat64(float.Parse(GetValorWrapper(valor), CultureInfo.InvariantCulture));
+            EntornoActual.DeclracionVariable(identificador, valor);
             return ValorVoid;
-        } else if (valor is ValorFloat64 && tipo != "float64"){
-            Salida += "Tipo de Dato NO Coincide con el Valor:";
+        } else if (valor is ValorInt && tipo != "int"){
+            Salida += "Tipo de Dato: " + tipo + " No Coincide con el Valor: " + GetTipoValor(valor)+ "\n";
+            return ValorVoid;
+        }else if (valor is ValorFloat64 && tipo != "float64"){
+            Salida += "Tipo de Dato: " + tipo + " No Coincide con el Valor: " + GetTipoValor(valor)+ "\n";
             return ValorVoid;
         } else if (valor is ValorString && tipo != "string"){
-           Salida += "Tipo de Dato NO Coincide con el Valor:";
+           Salida += "Tipo de Dato: " + tipo + " No Coincide con el Valor: " + GetTipoValor(valor)+ "\n";
            return ValorVoid;
         } else if (valor is ValorBoolean && tipo != "bool"){
-            Salida += "Tipo de Dato NO Coincide con el Valor:";
+            Salida += "Tipo de Dato: " + tipo + " No Coincide con el Valor: " + GetTipoValor(valor)+ "\n";
             return ValorVoid;
         } else if (valor is ValorRune && tipo != "rune"){
-           Salida += "Tipo de Dato NO Coincide con el Valor:";
+           Salida += "Tipo de Dato: " + tipo + " No Coincide con el Valor: " + GetTipoValor(valor)+ "\n";
            return ValorVoid;
         }
         EntornoActual.DeclracionVariable(identificador, valor);
@@ -163,12 +181,22 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         return ValorVoid;
     }
 
-
-    // VisitDeclaraciones
     // VisitParentesis
-    // VisitIdentificador
-    // VisitRestaUnaria
-    // VisitExprStmt
+    public override ValorWrapper VisitParentesis(LanguageParser.ParentesisContext context)
+    {
+        return Visit(context.expresion());
+    }
+
+    // VisitSumaResta
+    public override ValorWrapper VisitSumaResta(LanguageParser.SumaRestaContext context)
+    {
+        ValorWrapper izquierda = Visit(context.izquierda);
+        ValorWrapper derecha = Visit(context.derecha);
+        string operador = context.operador.Text;
+        Binaria binaria = new Binaria(izquierda, derecha, operador);
+        return binaria.RealizarOperacion();
+    }
+
 }
 
 

@@ -10,15 +10,15 @@ declaracion_variable: 'var' IDENTIFICADOR TIPO '=' expresion (';')? # Declaracio
 	| IDENTIFICADOR ':=' expresion (';')?                           # DeclaracionImplicita
 	;
 
-sentencia: expresion ';' # ExprStmt 
+sentencia: expresion (';')? # ExprStmt 
 	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  # FuncionEmbebidaPrintln
 	| '{' declaraciones* '}' # Bloque
 	;
 
 expresion:
-	'-' expresion						# RestaUnaria
-	| expresion ('*' | '/') expresion	# MulDiv
-	| expresion ('+' | '-') expresion	# AddSub
+	'-' expresion													# RestaUnaria
+	| izquierda=expresion operador=('*' | '/') derecha=expresion	# MultiplicacionDivision
+	| izquierda=expresion operador=('+' | '-') derecha=expresion	# SumaResta
 	| BOOLEANO							# Booleano
 	| DECIMAL							# Decimal
 	| CARACTER							# Caracter

@@ -13,12 +13,15 @@ public class Entorno
 
     public ValorWrapper GetVariable(string identificador)
     {
-        if (Variable.ContainsKey(identificador))
-        {
+        if (Variable.ContainsKey(identificador)){
             return Variable[identificador];
-        } else {
-            throw new Exception("Variable: " + identificador + " No Encontrada");
         }
+
+        if (EntornoPadre != null){
+            return EntornoPadre.GetVariable(identificador);
+        }
+        throw new Exception("Variable: " + identificador + " No Encontrada");
+      
     }
 
     public void DeclracionVariable(string identificador, ValorWrapper valor)
@@ -35,8 +38,10 @@ public class Entorno
         if (Variable.ContainsKey(identificador)){
             Variable[identificador] = valor;
             return valor;
-        } else {
-            throw new Exception("Variable: " + identificador + " No Encontrada");
+        } 
+        if (EntornoPadre != null){
+            return EntornoPadre.AsignacionVariable(identificador, valor);
         }
+        throw new Exception("Variable: " + identificador + " No Encontrada");
     }
 }
