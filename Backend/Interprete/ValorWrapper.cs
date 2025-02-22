@@ -1,13 +1,13 @@
-public abstract record ValorWapper;
+public abstract record ValorWrapper;
 
-public record ValorInt(int Valor) : ValorWapper;
+public record ValorInt(int Valor) : ValorWrapper;
 
-public record ValorFloat64(float Valor) : ValorWapper;
+public record ValorFloat64(float Valor) : ValorWrapper;
 
-public record ValorString(string Valor) : ValorWapper;
+public record ValorString(string Valor) : ValorWrapper;
 
-public record ValorBoolean(bool Valor) : ValorWapper;
+public record ValorBoolean(bool Valor) : ValorWrapper;
 
-public record ValorRune(char Valor) : ValorWapper;
+public record ValorRune(char Valor) : ValorWrapper;
 
-public record ValorVoid : ValorWapper;
+public record ValorVoid : ValorWrapper;

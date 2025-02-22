@@ -1,9 +1,17 @@
 public class Entorno
 {
 
-    public Dictionary<string, ValorWapper> Variable = new Dictionary<string, ValorWapper>();
+    public Dictionary<string, ValorWrapper> Variable = new Dictionary<string, ValorWrapper>();
 
-    public ValorWapper GetVariable(string identificador)
+    private Entorno? EntornoPadre;
+
+    public Entorno(Entorno? EntornoPadre)
+    {
+        this.EntornoPadre = EntornoPadre;
+    }
+
+
+    public ValorWrapper GetVariable(string identificador)
     {
         if (Variable.ContainsKey(identificador))
         {
@@ -13,7 +21,7 @@ public class Entorno
         }
     }
 
-    public void DeclracionVariable(string identificador, ValorWapper valor)
+    public void DeclracionVariable(string identificador, ValorWrapper valor)
     {
         if (Variable.ContainsKey(identificador)){
             throw new Exception("Variable: " + identificador + " Ya Existe");
@@ -22,7 +30,7 @@ public class Entorno
         }
     }
 
-    public ValorWapper AsignacionVariable (string identificador, ValorWapper valor)
+    public ValorWrapper AsignacionVariable (string identificador, ValorWrapper valor)
     {
         if (Variable.ContainsKey(identificador)){
             Variable[identificador] = valor;

@@ -1,15 +1,16 @@
 
 using Analizador;
+using System.Globalization;
 
-public class InterpreteVisitor : LanguageBaseVisitor<ValorWapper>
+public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 {
 
     public string Salida = "";
-    private Entorno EntornoActual = new Entorno();
+    private Entorno EntornoActual = new Entorno(null);
 
-    private ValorWapper ValorVoid = new ValorVoid();
+    private ValorWrapper ValorVoid = new ValorVoid();
 
-    private string ObtenerValor(ValorWapper valor)
+    private string GetValorWrapper(ValorWrapper valor)
     {
         return valor switch
         {
@@ -24,7 +25,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWapper>
     }
 
     // VisitProgram
-    public override ValorWapper VisitProgram(LanguageParser.ProgramContext context)
+    public override ValorWrapper VisitProgram(LanguageParser.ProgramContext context)
     {
         foreach (var sentencia in context.declaraciones())
         {
@@ -33,59 +34,78 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWapper>
         return ValorVoid;
     }
 
+    // VisitBloque
+    public override ValorWrapper VisitBloque(LanguageParser.BloqueContext context)
+    {
+        Entorno EntornoPrevio =  EntornoActual;
+        EntornoActual = new Entorno(EntornoPrevio);
+        foreach (var sentencia in context.declaraciones())
+        {
+            Visit(sentencia);
+        }
+        EntornoActual = EntornoPrevio;
+        return ValorVoid;
+    }
+
     //VisitEntero
-    public override ValorWapper VisitEntero(LanguageParser.EnteroContext context)
+    public override ValorWrapper VisitEntero(LanguageParser.EnteroContext context)
     {
         return new ValorInt(int.Parse(context.ENTERO().GetText()));
     }
 
     //VisitDecimal
-    public override ValorWapper VisitDecimal(LanguageParser.DecimalContext context)
+    public override ValorWrapper VisitDecimal(LanguageParser.DecimalContext context)
     {
-        return new ValorFloat64(float.Parse(context.DECIMAL().GetText()));
+        return new ValorFloat64(float.Parse(context.DECIMAL().GetText(), CultureInfo.InvariantCulture));
     }
 
     // VisitCadena
-    public override ValorWapper VisitCadena(LanguageParser.CadenaContext context)
+    public override ValorWrapper VisitCadena(LanguageParser.CadenaContext context)
     {
         string cadena = context.CADENA().GetText();
         return new ValorString(cadena.Substring(1, cadena.Length - 2));
     }
 
     // VisitBooleano
-    public override ValorWapper VisitBooleano(LanguageParser.BooleanoContext context)
+    public override ValorWrapper VisitBooleano(LanguageParser.BooleanoContext context)
     {
         return new ValorBoolean(bool.Parse(context.BOOLEANO().GetText()));
     }
 
     // VisitCaracter
-    public override ValorWapper VisitCaracter(LanguageParser.CaracterContext context)
+    public override ValorWrapper VisitCaracter(LanguageParser.CaracterContext context)
     {
-        return new ValorRune(char.Parse(context.CARACTER().GetText()));
+        string caracter = context.CARACTER().GetText();
+        return new ValorRune(caracter[1]);
     }
 
-    public override ValorWapper VisitIdentificador(LanguageParser.IdentificadorContext context)
+    public override ValorWrapper VisitIdentificador(LanguageParser.IdentificadorContext context)
     {
         return EntornoActual.GetVariable(context.IDENTIFICADOR().GetText());
     }
     // VisitDeclaracionExplicita
 
-    public override ValorWapper VisitDeclaracionExplicita(LanguageParser.DeclaracionExplicitaContext context)
+    public override ValorWrapper VisitDeclaracionExplicita(LanguageParser.DeclaracionExplicitaContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWapper valor = Visit(context.expresion());
+        ValorWrapper valor = Visit(context.expresion());
         string tipo = context.TIPO().GetText();
 
         if (valor is ValorInt && tipo != "int"){
             Salida += "Tipo de Dato NO Coincide con el Valor:";
+            return ValorVoid;
         } else if (valor is ValorFloat64 && tipo != "float64"){
             Salida += "Tipo de Dato NO Coincide con el Valor:";
+            return ValorVoid;
         } else if (valor is ValorString && tipo != "string"){
            Salida += "Tipo de Dato NO Coincide con el Valor:";
+           return ValorVoid;
         } else if (valor is ValorBoolean && tipo != "bool"){
             Salida += "Tipo de Dato NO Coincide con el Valor:";
+            return ValorVoid;
         } else if (valor is ValorRune && tipo != "rune"){
            Salida += "Tipo de Dato NO Coincide con el Valor:";
+           return ValorVoid;
         }
         EntornoActual.DeclracionVariable(identificador, valor);
         return ValorVoid;
@@ -93,16 +113,16 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWapper>
 
     // VisitDeclaracionImplicita
     
-    public override ValorWapper VisitDeclaracionImplicita(LanguageParser.DeclaracionImplicitaContext context)
+    public override ValorWrapper VisitDeclaracionImplicita(LanguageParser.DeclaracionImplicitaContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWapper valor = Visit(context.expresion());
+        ValorWrapper valor = Visit(context.expresion());
         EntornoActual.DeclracionVariable(identificador, valor);
         return ValorVoid;
     }
     // VisitDeclaracionPorDefecto
 
-    public override ValorWapper VisitDeclaracionPorDefecto(LanguageParser.DeclaracionPorDefectoContext context)
+    public override ValorWrapper VisitDeclaracionPorDefecto(LanguageParser.DeclaracionPorDefectoContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
         string tipo = context.TIPO().GetText();
@@ -129,18 +149,18 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWapper>
     }
 
     // VisitFuncionEmbebidaPrintln
-    public override ValorWapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)
+    public override ValorWrapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)
     {
-    List<string> valores = new List<string>();
+        List<string> ValoresSalida = new List<string>();
 
-    foreach (var expre in context.expresion())
-    {
-        ValorWapper valor = Visit(expre);
-        valores.Add(ObtenerValor(valor)); 
-    }
+        foreach (var expre in context.expresion())
+        {
+            ValorWrapper valor = Visit(expre);
+            ValoresSalida.Add(GetValorWrapper(valor)); 
+        }
 
-    Salida += string.Join(" ", valores) + "\n";
-    return ValorVoid;
+        Salida += string.Join(" ", ValoresSalida) + "\n";
+        return ValorVoid;
     }
 
 

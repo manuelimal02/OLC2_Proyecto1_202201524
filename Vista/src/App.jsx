@@ -19,7 +19,7 @@ function App() {
         console.log("Respuesta completa de la API:", data);
         setSalida(data?.result || "Error: Respuesta vacía o inválida");
       })
-      .catch(error => console.error("Fetch error:", error));
+      .catch(error => setSalida(error));
         
   };
 

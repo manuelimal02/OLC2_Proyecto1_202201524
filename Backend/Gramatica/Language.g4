@@ -12,6 +12,7 @@ declaracion_variable: 'var' IDENTIFICADOR TIPO '=' expresion (';')? # Declaracio
 
 sentencia: expresion ';' # ExprStmt 
 	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  # FuncionEmbebidaPrintln
+	| '{' declaraciones* '}' # Bloque
 	;
 
 expresion:
@@ -38,11 +39,10 @@ ENTERO: [0-9]+;
 DECIMAL: [0-9]+ '.' [0-9]+;
 CADENA: '"' ~["]* '"';
 BOOLEANO: 'true' | 'false';
-CARACTER: '\'' ~["]* '\'';
+CARACTER: '\'' . '\'';
 
 IDENTIFICADOR: [_a-zA-Z][_a-zA-Z0-9]*;
 
 WS: [ \t\r\n]+ -> skip;
-COMENTARIO: COMENTARIOL | COMENTARIOLN;
-COMENTARIOL: '//' ~[\n\r]* -> skip;
-COMENTARIOLN: '/*' .*? '*/'-> skip;
+COMENTARIOL: '//' ~[\r\n]* -> skip;
+COMENTARIOLN: '/*' .*? '*/' -> skip;

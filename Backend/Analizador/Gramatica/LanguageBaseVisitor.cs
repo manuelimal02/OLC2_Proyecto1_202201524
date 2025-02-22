@@ -111,6 +111,17 @@ public partial class LanguageBaseVisitor<Result> : AbstractParseTreeVisitor<Resu
 	/// <return>The visitor result.</return>
 	public virtual Result VisitFuncionEmbebidaPrintln([NotNull] LanguageParser.FuncionEmbebidaPrintlnContext context) { return VisitChildren(context); }
 	/// <summary>
+	/// Visit a parse tree produced by the <c>Bloque</c>
+	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
+	/// <para>
+	/// The default implementation returns the result of calling <see cref="AbstractParseTreeVisitor{Result}.VisitChildren(IRuleNode)"/>
+	/// on <paramref name="context"/>.
+	/// </para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	public virtual Result VisitBloque([NotNull] LanguageParser.BloqueContext context) { return VisitChildren(context); }
+	/// <summary>
 	/// Visit a parse tree produced by the <c>Caracter</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// <para>

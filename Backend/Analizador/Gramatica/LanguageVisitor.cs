@@ -80,6 +80,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitFuncionEmbebidaPrintln([NotNull] LanguageParser.FuncionEmbebidaPrintlnContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>Bloque</c>
+	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitBloque([NotNull] LanguageParser.BloqueContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>Caracter</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
