@@ -60,7 +60,8 @@ function App() {
         <div className="container-entrada">
           <Editor 
             height="500px" 
-            defaultLanguage="golang" 
+            defaultLanguage="go" 
+            theme='vs-dark'
             value={Entrada}
             onChange={(value) => setEntrada(value || '')}
           />

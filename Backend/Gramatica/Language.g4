@@ -16,17 +16,26 @@ sentencia: expresion (';')? # ExprStmt
 	;
 
 expresion:
-	'-' expresion													# RestaUnaria
-	| izquierda=expresion operador=('*' | '/') derecha=expresion	# MultiplicacionDivision
-	| izquierda=expresion operador=('+' | '-') derecha=expresion	# SumaResta
-	| BOOLEANO							# Booleano
-	| DECIMAL							# Decimal
-	| CARACTER							# Caracter
-	| CADENA							# Cadena
-	| ENTERO							# Entero
-	| IDENTIFICADOR						# Identificador
-	| '(' expresion ')'					# Parentesis
+	operador='-' izquierda=expresion                                         		# NegacionUnaria
+	| operador='!' izquierda=expresion                                       		# NegacionLogica
+	| izquierda=expresion operador=('*' | '/' | '%') derecha=expresion              # MultiplicacionDivisionModulo
+	| izquierda=expresion operador=('+' | '-') derecha=expresion                    # SumaResta
+	| izquierda=expresion operador=('<' | '<=' | '>' | '>=') derecha=expresion      # Relacional
+	| izquierda=expresion operador=('==' | '!=') derecha=expresion                  # IgualdadDesigualdad
+	| izquierda=expresion operador='&&' derecha=expresion                           # LogicoAnd
+	| izquierda=expresion operador='||' derecha=expresion                           # LogicoOr
+	| IDENTIFICADOR '=' expresion                        # AsignacionVariable
+	| IDENTIFICADOR '+=' expresion                       # AsignacionVariableSuma
+	| IDENTIFICADOR '-=' expresion                       # AsignacionVariableResta
+	| BOOLEANO                                           # Booleano
+	| DECIMAL                                            # Decimal
+	| CARACTER                                           # Caracter
+	| CADENA                                             # Cadena
+	| ENTERO                                             # Entero
+	| IDENTIFICADOR                                      # Identificador
+	| '(' expresion ')'                                  # Parentesis
 	;
+
 
 TIPO: 'int' 	
 	| 'float64' 

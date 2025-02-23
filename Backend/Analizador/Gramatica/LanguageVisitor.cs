@@ -87,26 +87,19 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitBloque([NotNull] LanguageParser.BloqueContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>Caracter</c>
+	/// Visit a parse tree produced by the <c>AsignacionVariable</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitCaracter([NotNull] LanguageParser.CaracterContext context);
+	Result VisitAsignacionVariable([NotNull] LanguageParser.AsignacionVariableContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>Decimal</c>
+	/// Visit a parse tree produced by the <c>IgualdadDesigualdad</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitDecimal([NotNull] LanguageParser.DecimalContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>Entero</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitEntero([NotNull] LanguageParser.EnteroContext context);
+	Result VisitIgualdadDesigualdad([NotNull] LanguageParser.IgualdadDesigualdadContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Parentesis</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
@@ -122,26 +115,75 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitCadena([NotNull] LanguageParser.CadenaContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>MultiplicacionDivision</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitMultiplicacionDivision([NotNull] LanguageParser.MultiplicacionDivisionContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>RestaUnaria</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitRestaUnaria([NotNull] LanguageParser.RestaUnariaContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>Booleano</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitBooleano([NotNull] LanguageParser.BooleanoContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>NegacionUnaria</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNegacionUnaria([NotNull] LanguageParser.NegacionUnariaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>SumaResta</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSumaResta([NotNull] LanguageParser.SumaRestaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>LogicoAnd</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogicoAnd([NotNull] LanguageParser.LogicoAndContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>NegacionLogica</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNegacionLogica([NotNull] LanguageParser.NegacionLogicaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Caracter</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitCaracter([NotNull] LanguageParser.CaracterContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>LogicoOr</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogicoOr([NotNull] LanguageParser.LogicoOrContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Decimal</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDecimal([NotNull] LanguageParser.DecimalContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Relacional</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRelacional([NotNull] LanguageParser.RelacionalContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Entero</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitEntero([NotNull] LanguageParser.EnteroContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Identificador</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
@@ -150,11 +192,11 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitIdentificador([NotNull] LanguageParser.IdentificadorContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>SumaResta</c>
+	/// Visit a parse tree produced by the <c>MultiplicacionDivisionModulo</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitSumaResta([NotNull] LanguageParser.SumaRestaContext context);
+	Result VisitMultiplicacionDivisionModulo([NotNull] LanguageParser.MultiplicacionDivisionModuloContext context);
 }
 } // namespace Analizador
