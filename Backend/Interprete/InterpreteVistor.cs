@@ -207,6 +207,10 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitFuncionEmbebidaReflectTypeOf(LanguageParser.FuncionEmbebidaReflectTypeOfContext context)
     {
         ValorWrapper expresion = Visit(context.expresion());
+        if(expresion is ValorArreglo Arreglo)
+        {
+            return new ValorString("[]"+Arreglo.Tipo);
+        }
         return new ValorString(GetTipoValor(expresion));
     }
     // VisitParentesis
@@ -364,12 +368,17 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper valor = EntornoActual.GetVariable(identificador);
 
-        if (valor is ValorArreglo arreglo)
+        if (valor is ValorArreglo Arreglo)
         {
             ValorWrapper ValorBuscado = Visit(context.expresion());
-            for (int i = 0; i < arreglo.Valores.Count; i++)
+            if(!(Arreglo.Tipo).Equals(GetTipoValor(ValorBuscado), StringComparison.Ordinal))
             {
-                if (arreglo.Valores[i].Equals(ValorBuscado))
+                throw new Exception("Función Slices: Tipo de Dato: " + GetTipoValor(ValorBuscado) + " No Coincide con el Valor: " + Arreglo.Tipo);
+            }
+            
+            for (int i = 0; i < Arreglo.Valores.Count; i++)
+            {
+                if (Arreglo.Valores[i].Equals(ValorBuscado))
                 {
                     return new ValorInt(i);
                 }
@@ -377,6 +386,29 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             return new ValorInt(-1);
         }
         throw new Exception("Función Slices: La Variable: " + identificador + " No es un Arreglo");
+    }
+
+    // VisitFuncionEmbebidaStringsJoin
+    public override ValorWrapper VisitFuncionEmbebidaStringsJoin(LanguageParser.FuncionEmbebidaStringsJoinContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper Arreglo = EntornoActual.GetVariable(identificador);
+        ValorWrapper Separador = Visit(context.expresion());
+
+        if (!(Separador is ValorString))
+            throw new Exception("Función Join: El Separador: " + GetValorWrapper(Separador) + " No es un String");
+        
+        if (Arreglo is ValorArreglo ArregloEncontrado1)
+            if (ArregloEncontrado1.Tipo != "string")
+            throw new Exception("Función Join: Tipo de Dato Arreglo: " + ArregloEncontrado1.Tipo + " No es un String");
+            
+        
+        if (Arreglo is ValorArreglo ArregloEncontrado)
+        {
+            List<string> ValoresArreglo = ArregloEncontrado.Valores.Select(valor => GetValorWrapper(valor)).ToList();
+            return new ValorString(string.Join(GetValorWrapper(Separador), ValoresArreglo));
+        }
+        throw new Exception("Función Join: La Variable: " + identificador + " No es un Arreglo");
     }
 
 }

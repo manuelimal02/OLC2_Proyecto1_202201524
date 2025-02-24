@@ -25,7 +25,9 @@ expresion:
  	  'strconv.Atoi(' expresion ')' (';')?                  # FuncionEmbebidaAtoi
 	| 'strconv.ParseFloat(' expresion ')'(';')?             # FuncionEmbebidaParseFloat
 	| 'reflect.TypeOf(' expresion ')' (';')?                # FuncionEmbebidaReflectTypeOf
-	| 'slices.Index(' IDENTIFICADOR ',' expresion ')' (';')?                 # FuncionEmbebidaSlicesIndex
+	| 'slices.Index(' IDENTIFICADOR ',' expresion ')' (';')?                 	# FuncionEmbebidaSlicesIndex
+	| 'strings.Join(' IDENTIFICADOR ',' expresion ')' (';')?   					# FuncionEmbebidaStringsJoin
+	| 'len(' IDENTIFICADOR ')' (';')?                      						# FuncionEmbebidaLen
 	| operador='-' izquierda=expresion                                         		# NegacionUnaria
 	| operador='!' izquierda=expresion                                       		# NegacionLogica
 	| izquierda=expresion operador=('*' | '/' | '%') derecha=expresion              # MultiplicacionDivisionModulo

@@ -178,6 +178,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitAsignacionVariableSuma([NotNull] LanguageParser.AsignacionVariableSumaContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaStringsJoin</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaStringsJoin([NotNull] LanguageParser.FuncionEmbebidaStringsJoinContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>NegacionLogica</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
