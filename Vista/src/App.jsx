@@ -8,19 +8,20 @@ function App() {
   const [Salida, setSalida] = useState('');
 
   const handleExecute = () => {
-
     fetch("http://localhost:5077/Controlador", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: Entrada })
+      body: JSON.stringify({ code: Entrada }),
     })
-      .then(response => response.json())
-      .then(data => {
-        console.log("Respuesta completa de la API:", data);
-        setSalida(data?.result || "Error: Respuesta vacía o inválida");
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Respuesta del servidor:", data);
+        setSalida(data?.result || data?.error);
       })
-      .catch(error => setSalida(error));
-        
+      .catch((error) => {
+        console.error("Error en la petición:", error);
+        setSalida(`Error: ${error.message}`);
+      });
   };
 
   return (

@@ -100,8 +100,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             EntornoActual.DeclracionVariable(identificador, expresion);
             return ValorVoid;
         } else if (!GetTipoValor(expresion).Equals(tipo, StringComparison.Ordinal)){
-            Salida += "Decla: Tipo de Dato: " + tipo + " No Coincide con el Valor: " + GetTipoValor(expresion)+ "\n";
-            return ValorVoid;
+            throw new Exception("Declaración: Tipo de Dato: " + tipo + " No Coincide con el Valor: " + GetTipoValor(expresion));
         }else{
             EntornoActual.DeclracionVariable(identificador, expresion);
             return ValorVoid;
@@ -154,8 +153,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         } else if (GetTipoValor(expresion).Equals(GetTipoValor(valor), StringComparison.Ordinal)){
             return EntornoActual.AsignacionVariable(identificador, expresion);
         }
-        Salida += "Asig: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: " + GetTipoValor(valor) + "\n";
-        return ValorVoid;
+        throw new Exception("Asignación: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: " + GetTipoValor(valor));
     }
     // VisitFuncionEmbebidaPrintln
     public override ValorWrapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)

@@ -34,14 +34,21 @@ namespace Backend.Controllers
             {
                 return BadRequest(new { error = "Petición Incorrecta" });
             }
-            var CadenaEntrada = new AntlrInputStream(request.code);
-            var Lexemas = new LanguageLexer(CadenaEntrada);
-            var Tokens = new CommonTokenStream(Lexemas);
-            var Parser = new LanguageParser(Tokens);
-            var ArbolSintactico = Parser.program();
-            var PatronVisitor = new InterpreteVisitor();
-            PatronVisitor.Visit(ArbolSintactico);
-            return Ok(new { result = PatronVisitor.Salida});
+            try
+            {
+                var CadenaEntrada = new AntlrInputStream(request.code);
+                var Lexemas = new LanguageLexer(CadenaEntrada);
+                var Tokens = new CommonTokenStream(Lexemas);
+                var Parser = new LanguageParser(Tokens);
+                var ArbolSintactico = Parser.program();
+                var PatronVisitor = new InterpreteVisitor();
+                PatronVisitor.Visit(ArbolSintactico);
+                return Ok(new { result = PatronVisitor.Salida });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }
