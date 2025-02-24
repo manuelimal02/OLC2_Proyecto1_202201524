@@ -16,7 +16,9 @@ sentencia: expresion (';')? # ExprStmt
 	;
 
 expresion:
- 	'strconv.Atoi(' expresion ')' (';')?                  # FuncionEmbebidaAtoi
+ 	  'strconv.Atoi(' expresion ')' (';')?                  # FuncionEmbebidaAtoi
+	| 'strconv.ParseFloat(' expresion ')'(';')?             # FuncionEmbebidaParseFloat
+	| 'reflect.TypeOf(' expresion ')' (';')?                # FuncionEmbebidaReflectTypeOf
 	| operador='-' izquierda=expresion                                         		# NegacionUnaria
 	| operador='!' izquierda=expresion                                       		# NegacionLogica
 	| izquierda=expresion operador=('*' | '/' | '%') derecha=expresion              # MultiplicacionDivisionModulo

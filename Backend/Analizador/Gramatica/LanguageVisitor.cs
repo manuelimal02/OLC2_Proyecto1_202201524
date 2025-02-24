@@ -178,6 +178,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitLogicoOr([NotNull] LanguageParser.LogicoOrContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaReflectTypeOf</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaReflectTypeOf([NotNull] LanguageParser.FuncionEmbebidaReflectTypeOfContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>Decimal</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
@@ -198,6 +205,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitEntero([NotNull] LanguageParser.EnteroContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaParseFloat</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaParseFloat([NotNull] LanguageParser.FuncionEmbebidaParseFloatContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>FuncionEmbebidaAtoi</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.

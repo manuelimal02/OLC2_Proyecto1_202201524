@@ -172,14 +172,35 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     // VisitFuncionEmbebidaAtoi
     public override ValorWrapper VisitFuncionEmbebidaAtoi(LanguageParser.FuncionEmbebidaAtoiContext context)
     {
-        /*
+        
         ValorWrapper expresion = Visit(context.expresion());
-        if ((expresion is ValorString) && (!GetTipoValor(expresion).Equals("float64", StringComparison.Ordinal))){
-            return new ValorInt(int.Parse(GetValorWrapper(expresion)));
+        Console.WriteLine(GetTipoValor(expresion));
+        if (expresion is ValorString){
+            if (int.TryParse(GetValorWrapper(expresion), out int result)){
+                return new ValorInt(result);
+            }
+            throw new Exception("Función Atoi: Valor: " + GetValorWrapper(expresion) + " No es un Entero");
         }
         throw new Exception("Función Atoi: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: string");
-        */
-        return ValorVoid;
+
+    }
+    // VisitFuncionEmbebidaParseFloat
+    public override ValorWrapper VisitFuncionEmbebidaParseFloat(LanguageParser.FuncionEmbebidaParseFloatContext context)
+    {
+        ValorWrapper expresion = Visit(context.expresion());
+        if (expresion is ValorString || expresion is ValorInt){
+            if (float.TryParse(GetValorWrapper(expresion), NumberStyles.Any, CultureInfo.InvariantCulture, out float result)){
+                return new ValorFloat64(result);
+            }
+            throw new Exception("Función ParseFloat: Valor: " + GetValorWrapper(expresion) + " No es un Decimal");
+        }
+        throw new Exception("Función ParseFloat: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: string");
+    }
+    //VisitFuncionEmbebidaReflectTypeOf
+    public override ValorWrapper VisitFuncionEmbebidaReflectTypeOf(LanguageParser.FuncionEmbebidaReflectTypeOfContext context)
+    {
+        ValorWrapper expresion = Visit(context.expresion());
+        return new ValorString(GetTipoValor(expresion));
     }
     // VisitParentesis
     public override ValorWrapper VisitParentesis(LanguageParser.ParentesisContext context)
