@@ -101,6 +101,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitIgualdadDesigualdad([NotNull] LanguageParser.IgualdadDesigualdadContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>AsignacionVariableResta</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAsignacionVariableResta([NotNull] LanguageParser.AsignacionVariableRestaContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>Parentesis</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
@@ -143,6 +150,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitLogicoAnd([NotNull] LanguageParser.LogicoAndContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>AsignacionVariableSuma</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAsignacionVariableSuma([NotNull] LanguageParser.AsignacionVariableSumaContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>NegacionLogica</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
@@ -184,6 +198,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitEntero([NotNull] LanguageParser.EnteroContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaAtoi</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaAtoi([NotNull] LanguageParser.FuncionEmbebidaAtoiContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Identificador</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.

@@ -169,6 +169,18 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         Salida += string.Join(" ", ValoresSalida) + "\n";
         return ValorVoid;
     }
+    // VisitFuncionEmbebidaAtoi
+    public override ValorWrapper VisitFuncionEmbebidaAtoi(LanguageParser.FuncionEmbebidaAtoiContext context)
+    {
+        /*
+        ValorWrapper expresion = Visit(context.expresion());
+        if ((expresion is ValorString) && (!GetTipoValor(expresion).Equals("float64", StringComparison.Ordinal))){
+            return new ValorInt(int.Parse(GetValorWrapper(expresion)));
+        }
+        throw new Exception("Función Atoi: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: string");
+        */
+        return ValorVoid;
+    }
     // VisitParentesis
     public override ValorWrapper VisitParentesis(LanguageParser.ParentesisContext context)
     {
@@ -245,6 +257,47 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string operador = context.operador.Text;
         Binaria binaria = new Binaria(izquierda, derecha, operador);
         return binaria.RealizarOperacion();
+    }
+    //VisitAsignacionVariableSuma
+    public override ValorWrapper VisitAsignacionVariableSuma(LanguageParser.AsignacionVariableSumaContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        // Izquierda
+        ValorWrapper expresion = Visit(context.expresion());
+        // Derecha
+        ValorWrapper valor = EntornoActual.GetVariable(identificador);
+
+        if (expresion is ValorInt && valor is ValorFloat64){
+            Binaria binaria = new Binaria(valor, expresion, "+");
+            ValorWrapper resultado = binaria.RealizarOperacion();
+            return EntornoActual.AsignacionVariable(identificador, resultado);
+        } else if (GetTipoValor(expresion).Equals(GetTipoValor(valor), StringComparison.Ordinal)){
+            Binaria binaria = new Binaria(valor, expresion, "+");
+            ValorWrapper resultado = binaria.RealizarOperacion();
+            return EntornoActual.AsignacionVariable(identificador, resultado);
+        }
+        throw new Exception("Asignación: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: " + GetTipoValor(valor));
+    }
+
+    // VisitAsignacionVariableResta
+    public override ValorWrapper VisitAsignacionVariableResta(LanguageParser.AsignacionVariableRestaContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        // Izquierda
+        ValorWrapper expresion = Visit(context.expresion());
+        // Derecha
+        ValorWrapper valor = EntornoActual.GetVariable(identificador);
+
+        if (expresion is ValorInt && valor is ValorFloat64){
+            Binaria binaria = new Binaria(valor, expresion, "-");
+            ValorWrapper resultado = binaria.RealizarOperacion();
+            return EntornoActual.AsignacionVariable(identificador, resultado);
+        } else if (GetTipoValor(expresion).Equals(GetTipoValor(valor), StringComparison.Ordinal)){
+            Binaria binaria = new Binaria(valor, expresion, "-");
+            ValorWrapper resultado = binaria.RealizarOperacion();
+            return EntornoActual.AsignacionVariable(identificador, resultado);
+        }
+        throw new Exception("Asignación: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: " + GetTipoValor(valor));
     }
 
 }

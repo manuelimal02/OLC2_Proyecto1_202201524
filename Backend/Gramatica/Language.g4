@@ -16,7 +16,8 @@ sentencia: expresion (';')? # ExprStmt
 	;
 
 expresion:
-	operador='-' izquierda=expresion                                         		# NegacionUnaria
+ 	'strconv.Atoi(' expresion ')' (';')?                  # FuncionEmbebidaAtoi
+	| operador='-' izquierda=expresion                                         		# NegacionUnaria
 	| operador='!' izquierda=expresion                                       		# NegacionLogica
 	| izquierda=expresion operador=('*' | '/' | '%') derecha=expresion              # MultiplicacionDivisionModulo
 	| izquierda=expresion operador=('+' | '-') derecha=expresion                    # SumaResta
