@@ -358,4 +358,25 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         return ValorVoid;
     }
 
+    // VisitFuncionEmbebidaSlicesIndex
+    public override ValorWrapper VisitFuncionEmbebidaSlicesIndex(LanguageParser.FuncionEmbebidaSlicesIndexContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper valor = EntornoActual.GetVariable(identificador);
+
+        if (valor is ValorArreglo arreglo)
+        {
+            ValorWrapper ValorBuscado = Visit(context.expresion());
+            for (int i = 0; i < arreglo.Valores.Count; i++)
+            {
+                if (arreglo.Valores[i].Equals(ValorBuscado))
+                {
+                    return new ValorInt(i);
+                }
+            }
+            return new ValorInt(-1);
+        }
+        throw new Exception("Función Slices: La Variable: " + identificador + " No es un Arreglo");
+    }
+
 }

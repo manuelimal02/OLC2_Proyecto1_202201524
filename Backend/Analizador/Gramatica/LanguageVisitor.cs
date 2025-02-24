@@ -143,6 +143,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitBooleano([NotNull] LanguageParser.BooleanoContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaSlicesIndex</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaSlicesIndex([NotNull] LanguageParser.FuncionEmbebidaSlicesIndexContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>NegacionUnaria</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
