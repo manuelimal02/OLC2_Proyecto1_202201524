@@ -31,6 +31,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ValorBoolean _ => "bool",
             ValorRune _ => "rune",
             ValorVoid _ => "void",
+            ValorArreglo _ => "arreglo",
             _ => throw new ArgumentException("Tipo de valor no soportado")
         };
     }
@@ -159,13 +160,19 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)
     {
         List<string> ValoresSalida = new List<string>();
-
         foreach (var expre in context.expresion())
         {
             ValorWrapper expresion = Visit(expre);
-            ValoresSalida.Add(GetValorWrapper(expresion)); 
+            if (expresion is ValorArreglo Arreglo)
+            {
+                string ArregloString = "[" + string.Join(" ", Arreglo.Valores.Select(valor => GetValorWrapper(valor))) + "]";
+                ValoresSalida.Add(ArregloString);
+            }
+            else
+            {
+                ValoresSalida.Add(GetValorWrapper(expresion));
+            }
         }
-
         Salida += string.Join(" ", ValoresSalida) + "\n";
         return ValorVoid;
     }
@@ -319,6 +326,36 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             return EntornoActual.AsignacionVariable(identificador, resultado);
         }
         throw new Exception("Asignación: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: " + GetTipoValor(valor));
+    }
+    // VisitDeclaracionArregloExplicita
+    public override ValorWrapper VisitDeclaracionArregloExplicita(LanguageParser.DeclaracionArregloExplicitaContext context)
+    {
+        string TipoArreglo = context.TIPO().GetText();
+        List<ValorWrapper> valores = new List<ValorWrapper>();
+
+        foreach (var expre in context.expresion())
+        {
+            ValorWrapper valor = Visit(expre);
+            if (GetTipoValor(valor) != TipoArreglo)
+            {
+                throw new Exception("Declaración de Arreglo: Tipo de Dato Arreglo: " + TipoArreglo + " No Coincide con el Valor: " + GetTipoValor(valor));
+            }
+            valores.Add(valor);
+        }
+        ValorWrapper arreglo = new ValorArreglo(valores, TipoArreglo);
+        string identificador = context.IDENTIFICADOR().GetText();
+        EntornoActual.DeclracionVariable(identificador, arreglo);
+        return ValorVoid;
+    }
+    // VisitDeclaracionArregloPorDefecto
+    public override ValorWrapper VisitDeclaracionArregloPorDefecto(LanguageParser.DeclaracionArregloPorDefectoContext context)
+    {
+        string tipo = context.TIPO().GetText();
+        List<ValorWrapper> valores = new List<ValorWrapper>();
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper arreglo = new ValorArreglo(valores, tipo);
+        EntornoActual.DeclracionVariable(identificador, arreglo);
+        return ValorVoid;
     }
 
 }

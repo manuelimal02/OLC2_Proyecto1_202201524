@@ -2,12 +2,18 @@ grammar Language;
 
 program: declaraciones*;
 
-declaraciones: declaracion_variable 
-			| sentencia;
+declaraciones: declaracion_arreglo 
+	| declaracion_variable
+	| sentencia
+	;
 
 declaracion_variable: 'var' IDENTIFICADOR TIPO '=' expresion (';')? # DeclaracionExplicita
 	| 'var' IDENTIFICADOR TIPO (';')?                               # DeclaracionPorDefecto
 	| IDENTIFICADOR ':=' expresion (';')?                           # DeclaracionImplicita
+	;
+
+declaracion_arreglo: IDENTIFICADOR ':=' '[' ']' TIPO '{' (expresion (',' expresion)*) '}' (';')? 	# DeclaracionArregloExplicita
+	| 'var' IDENTIFICADOR '[' ']' TIPO  (';')? 														# DeclaracionArregloPorDefecto
 	;
 
 sentencia: expresion (';')? # ExprStmt 
@@ -19,6 +25,7 @@ expresion:
  	  'strconv.Atoi(' expresion ')' (';')?                  # FuncionEmbebidaAtoi
 	| 'strconv.ParseFloat(' expresion ')'(';')?             # FuncionEmbebidaParseFloat
 	| 'reflect.TypeOf(' expresion ')' (';')?                # FuncionEmbebidaReflectTypeOf
+	| 'slices.Index(' IDENTIFICADOR ',' expresion ')' (';')?                 # FuncionEmbebidaSlicesIndex
 	| operador='-' izquierda=expresion                                         		# NegacionUnaria
 	| operador='!' izquierda=expresion                                       		# NegacionLogica
 	| izquierda=expresion operador=('*' | '/' | '%') derecha=expresion              # MultiplicacionDivisionModulo
@@ -38,7 +45,6 @@ expresion:
 	| IDENTIFICADOR                                      # Identificador
 	| '(' expresion ')'                                  # Parentesis
 	;
-
 
 TIPO: 'int' 	
 	| 'float64' 

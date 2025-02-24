@@ -66,6 +66,20 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitDeclaracionImplicita([NotNull] LanguageParser.DeclaracionImplicitaContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>DeclaracionArregloExplicita</c>
+	/// labeled alternative in <see cref="LanguageParser.declaracion_arreglo"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDeclaracionArregloExplicita([NotNull] LanguageParser.DeclaracionArregloExplicitaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>DeclaracionArregloPorDefecto</c>
+	/// labeled alternative in <see cref="LanguageParser.declaracion_arreglo"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDeclaracionArregloPorDefecto([NotNull] LanguageParser.DeclaracionArregloPorDefectoContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>ExprStmt</c>
 	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
 	/// </summary>
