@@ -241,6 +241,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitFuncionEmbebidaParseFloat([NotNull] LanguageParser.FuncionEmbebidaParseFloatContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaLen</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaLen([NotNull] LanguageParser.FuncionEmbebidaLenContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>FuncionEmbebidaAtoi</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>

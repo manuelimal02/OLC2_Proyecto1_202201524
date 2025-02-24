@@ -7,7 +7,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public string Salida = "";
     private Entorno EntornoActual = new Entorno(null);
     private ValorWrapper ValorVoid = new ValorVoid();
-    private string GetValorWrapper(ValorWrapper valor)
+    private string ObtenerValor(ValorWrapper valor)
     {
         return valor switch
         {
@@ -21,7 +21,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         };
     }
 
-    private string GetTipoValor(ValorWrapper valor)
+    private string ObtenerTipo(ValorWrapper valor)
     {
         return valor switch
         {
@@ -97,11 +97,11 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper expresion = Visit(context.expresion());
         string tipo = context.TIPO().GetText();
         if (expresion is ValorInt && tipo == "float64"){
-            expresion = new ValorFloat64(float.Parse(GetValorWrapper(expresion), CultureInfo.InvariantCulture));
+            expresion = new ValorFloat64(float.Parse(ObtenerValor(expresion), CultureInfo.InvariantCulture));
             EntornoActual.DeclracionVariable(identificador, expresion);
             return ValorVoid;
-        } else if (!GetTipoValor(expresion).Equals(tipo, StringComparison.Ordinal)){
-            throw new Exception("Declaración: Tipo de Dato: " + tipo + " No Coincide con el Valor: " + GetTipoValor(expresion));
+        } else if (!ObtenerTipo(expresion).Equals(tipo, StringComparison.Ordinal)){
+            throw new Exception("Declaración: Tipo de Dato: " + tipo + " No Coincide con el Valor: " + ObtenerTipo(expresion));
         }else{
             EntornoActual.DeclracionVariable(identificador, expresion);
             return ValorVoid;
@@ -146,15 +146,15 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper expresion = Visit(context.expresion());
-        ValorWrapper valor = EntornoActual.GetVariable(identificador);
+        ValorWrapper variable = EntornoActual.GetVariable(identificador);
 
-        if (expresion is ValorInt && valor is ValorFloat64){
-            expresion = new ValorFloat64(float.Parse(GetValorWrapper(expresion), CultureInfo.InvariantCulture));
+        if (expresion is ValorInt && variable is ValorFloat64){
+            expresion = new ValorFloat64(float.Parse(ObtenerValor(expresion), CultureInfo.InvariantCulture));
             return EntornoActual.AsignacionVariable(identificador, expresion);
-        } else if (GetTipoValor(expresion).Equals(GetTipoValor(valor), StringComparison.Ordinal)){
+        } else if (ObtenerTipo(expresion).Equals(ObtenerTipo(variable), StringComparison.Ordinal)){
             return EntornoActual.AsignacionVariable(identificador, expresion);
         }
-        throw new Exception("Asignación: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: " + GetTipoValor(valor));
+        throw new Exception("Asignación: Tipo de Dato: " + ObtenerTipo(expresion) + " No Coincide con el Valor: " + ObtenerTipo(variable));
     }
     // VisitFuncionEmbebidaPrintln
     public override ValorWrapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)
@@ -165,12 +165,12 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ValorWrapper expresion = Visit(expre);
             if (expresion is ValorArreglo Arreglo)
             {
-                string ArregloString = "[" + string.Join(" ", Arreglo.Valores.Select(valor => GetValorWrapper(valor))) + "]";
+                string ArregloString = "[" + string.Join(" ", Arreglo.Valores.Select(valor => ObtenerValor(valor))) + "]";
                 ValoresSalida.Add(ArregloString);
             }
             else
             {
-                ValoresSalida.Add(GetValorWrapper(expresion));
+                ValoresSalida.Add(ObtenerValor(expresion));
             }
         }
         Salida += string.Join(" ", ValoresSalida) + "\n";
@@ -181,14 +181,14 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         
         ValorWrapper expresion = Visit(context.expresion());
-        Console.WriteLine(GetTipoValor(expresion));
+        Console.WriteLine(ObtenerTipo(expresion));
         if (expresion is ValorString){
-            if (int.TryParse(GetValorWrapper(expresion), out int result)){
+            if (int.TryParse(ObtenerValor(expresion), out int result)){
                 return new ValorInt(result);
             }
-            throw new Exception("Función Atoi: Valor: " + GetValorWrapper(expresion) + " No es un Entero");
+            throw new Exception("Función Atoi: Valor: " + ObtenerValor(expresion) + " No es un Entero");
         }
-        throw new Exception("Función Atoi: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: string");
+        throw new Exception("Función Atoi: Tipo de Dato: " + ObtenerTipo(expresion) + " No Coincide con el Valor: string");
 
     }
     // VisitFuncionEmbebidaParseFloat
@@ -196,12 +196,12 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         ValorWrapper expresion = Visit(context.expresion());
         if (expresion is ValorString || expresion is ValorInt){
-            if (float.TryParse(GetValorWrapper(expresion), NumberStyles.Any, CultureInfo.InvariantCulture, out float result)){
+            if (float.TryParse(ObtenerValor(expresion), NumberStyles.Any, CultureInfo.InvariantCulture, out float result)){
                 return new ValorFloat64(result);
             }
-            throw new Exception("Función ParseFloat: Valor: " + GetValorWrapper(expresion) + " No es un Decimal");
+            throw new Exception("Función ParseFloat: Valor: " + ObtenerValor(expresion) + " No es un Decimal");
         }
-        throw new Exception("Función ParseFloat: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: string");
+        throw new Exception("Función ParseFloat: Tipo de Dato: " + ObtenerTipo(expresion) + " No Coincide con el Valor: string");
     }
     //VisitFuncionEmbebidaReflectTypeOf
     public override ValorWrapper VisitFuncionEmbebidaReflectTypeOf(LanguageParser.FuncionEmbebidaReflectTypeOfContext context)
@@ -211,7 +211,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         {
             return new ValorString("[]"+Arreglo.Tipo);
         }
-        return new ValorString(GetTipoValor(expresion));
+        return new ValorString(ObtenerTipo(expresion));
     }
     // VisitParentesis
     public override ValorWrapper VisitParentesis(LanguageParser.ParentesisContext context)
@@ -295,20 +295,20 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         // Izquierda
-        ValorWrapper expresion = Visit(context.expresion());
+        ValorWrapper izquierda = Visit(context.expresion());
         // Derecha
-        ValorWrapper valor = EntornoActual.GetVariable(identificador);
+        ValorWrapper variable = EntornoActual.GetVariable(identificador);
 
-        if (expresion is ValorInt && valor is ValorFloat64){
-            Binaria binaria = new Binaria(valor, expresion, "+");
+        if (izquierda is ValorInt && variable is ValorFloat64){
+            Binaria binaria = new Binaria(variable, izquierda, "+");
             ValorWrapper resultado = binaria.RealizarOperacion();
             return EntornoActual.AsignacionVariable(identificador, resultado);
-        } else if (GetTipoValor(expresion).Equals(GetTipoValor(valor), StringComparison.Ordinal)){
-            Binaria binaria = new Binaria(valor, expresion, "+");
+        } else if (ObtenerTipo(izquierda).Equals(ObtenerTipo(variable), StringComparison.Ordinal)){
+            Binaria binaria = new Binaria(variable, izquierda, "+");
             ValorWrapper resultado = binaria.RealizarOperacion();
             return EntornoActual.AsignacionVariable(identificador, resultado);
         }
-        throw new Exception("Asignación: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: " + GetTipoValor(valor));
+        throw new Exception("Asignación: Tipo de Dato: " + ObtenerTipo(izquierda) + " No Coincide con el Valor: " + ObtenerTipo(variable));
     }
 
     // VisitAsignacionVariableResta
@@ -316,49 +316,49 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         // Izquierda
-        ValorWrapper expresion = Visit(context.expresion());
+        ValorWrapper izquierda = Visit(context.expresion());
         // Derecha
-        ValorWrapper valor = EntornoActual.GetVariable(identificador);
+        ValorWrapper variable = EntornoActual.GetVariable(identificador);
 
-        if (expresion is ValorInt && valor is ValorFloat64){
-            Binaria binaria = new Binaria(valor, expresion, "-");
+        if (izquierda is ValorInt && variable is ValorFloat64){
+            Binaria binaria = new Binaria(variable, izquierda, "-");
             ValorWrapper resultado = binaria.RealizarOperacion();
             return EntornoActual.AsignacionVariable(identificador, resultado);
-        } else if (GetTipoValor(expresion).Equals(GetTipoValor(valor), StringComparison.Ordinal)){
-            Binaria binaria = new Binaria(valor, expresion, "-");
+        } else if (ObtenerTipo(izquierda).Equals(ObtenerTipo(variable), StringComparison.Ordinal)){
+            Binaria binaria = new Binaria(variable, izquierda, "-");
             ValorWrapper resultado = binaria.RealizarOperacion();
             return EntornoActual.AsignacionVariable(identificador, resultado);
         }
-        throw new Exception("Asignación: Tipo de Dato: " + GetTipoValor(expresion) + " No Coincide con el Valor: " + GetTipoValor(valor));
+        throw new Exception("Asignación: Tipo de Dato: " + ObtenerTipo(izquierda) + " No Coincide con el Valor: " + ObtenerTipo(variable));
     }
     // VisitDeclaracionArregloExplicita
     public override ValorWrapper VisitDeclaracionArregloExplicita(LanguageParser.DeclaracionArregloExplicitaContext context)
     {
+        string identificador = context.IDENTIFICADOR().GetText();
         string TipoArreglo = context.TIPO().GetText();
-        List<ValorWrapper> valores = new List<ValorWrapper>();
+        List<ValorWrapper> ArregloAuxiliar = new List<ValorWrapper>();
 
         foreach (var expre in context.expresion())
         {
-            ValorWrapper valor = Visit(expre);
-            if (GetTipoValor(valor) != TipoArreglo)
+            ValorWrapper ValoresArreglo = Visit(expre);
+            if (ObtenerTipo(ValoresArreglo) != TipoArreglo)
             {
-                throw new Exception("Declaración de Arreglo: Tipo de Dato Arreglo: " + TipoArreglo + " No Coincide con el Valor: " + GetTipoValor(valor));
+                throw new Exception("Declaración de Arreglo: Tipo de Dato Arreglo: " + TipoArreglo + " No Coincide con el Valor: " + ObtenerTipo(ValoresArreglo));
             }
-            valores.Add(valor);
+            ArregloAuxiliar.Add(ValoresArreglo);
         }
-        ValorWrapper arreglo = new ValorArreglo(valores, TipoArreglo);
-        string identificador = context.IDENTIFICADOR().GetText();
-        EntornoActual.DeclracionVariable(identificador, arreglo);
+        ValorWrapper NuevoArreglo = new ValorArreglo(ArregloAuxiliar, TipoArreglo);
+        EntornoActual.DeclracionVariable(identificador, NuevoArreglo);
         return ValorVoid;
     }
     // VisitDeclaracionArregloPorDefecto
     public override ValorWrapper VisitDeclaracionArregloPorDefecto(LanguageParser.DeclaracionArregloPorDefectoContext context)
     {
-        string tipo = context.TIPO().GetText();
-        List<ValorWrapper> valores = new List<ValorWrapper>();
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper arreglo = new ValorArreglo(valores, tipo);
-        EntornoActual.DeclracionVariable(identificador, arreglo);
+        string TipoArreglo = context.TIPO().GetText();
+        List<ValorWrapper> ArregloAuxiliar = new List<ValorWrapper>();
+        ValorWrapper NuevoArreglo = new ValorArreglo(ArregloAuxiliar, TipoArreglo);
+        EntornoActual.DeclracionVariable(identificador, NuevoArreglo);
         return ValorVoid;
     }
 
@@ -366,14 +366,14 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitFuncionEmbebidaSlicesIndex(LanguageParser.FuncionEmbebidaSlicesIndexContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper valor = EntornoActual.GetVariable(identificador);
+        ValorWrapper ArregloActual = EntornoActual.GetVariable(identificador);
 
-        if (valor is ValorArreglo Arreglo)
+        if (ArregloActual is ValorArreglo Arreglo)
         {
             ValorWrapper ValorBuscado = Visit(context.expresion());
-            if(!(Arreglo.Tipo).Equals(GetTipoValor(ValorBuscado), StringComparison.Ordinal))
+            if(!(Arreglo.Tipo).Equals(ObtenerTipo(ValorBuscado), StringComparison.Ordinal))
             {
-                throw new Exception("Función Slices: Tipo de Dato: " + GetTipoValor(ValorBuscado) + " No Coincide con el Valor: " + Arreglo.Tipo);
+                throw new Exception("Función Slices: Tipo de Dato: " + ObtenerTipo(ValorBuscado) + " No Coincide con el Valor: " + Arreglo.Tipo);
             }
             
             for (int i = 0; i < Arreglo.Valores.Count; i++)
@@ -392,21 +392,20 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitFuncionEmbebidaStringsJoin(LanguageParser.FuncionEmbebidaStringsJoinContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper Arreglo = EntornoActual.GetVariable(identificador);
+        ValorWrapper ArregloActual = EntornoActual.GetVariable(identificador);
         ValorWrapper Separador = Visit(context.expresion());
 
         if (!(Separador is ValorString))
-            throw new Exception("Función Join: El Separador: " + GetValorWrapper(Separador) + " No es un String");
+            throw new Exception("Función Join: El Separador: " + ObtenerValor(Separador) + " No es un String");
         
-        if (Arreglo is ValorArreglo ArregloEncontrado1)
-            if (ArregloEncontrado1.Tipo != "string")
-            throw new Exception("Función Join: Tipo de Dato Arreglo: " + ArregloEncontrado1.Tipo + " No es un String");
-            
+        if (ArregloActual is ValorArreglo Arreglo1)
+            if (Arreglo1.Tipo != "string")
+            throw new Exception("Función Join: Tipo de Dato Arreglo: " + Arreglo1.Tipo + " No es un String");
         
-        if (Arreglo is ValorArreglo ArregloEncontrado)
+        if (ArregloActual is ValorArreglo Arreglo2)
         {
-            List<string> ValoresArreglo = ArregloEncontrado.Valores.Select(valor => GetValorWrapper(valor)).ToList();
-            return new ValorString(string.Join(GetValorWrapper(Separador), ValoresArreglo));
+            List<string> ValoresArreglo = Arreglo2.Valores.Select(valor => ObtenerValor(valor)).ToList();
+            return new ValorString(string.Join(ObtenerValor(Separador), ValoresArreglo));
         }
         throw new Exception("Función Join: La Variable: " + identificador + " No es un Arreglo");
     }
