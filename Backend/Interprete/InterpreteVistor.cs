@@ -31,7 +31,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ValorBoolean _ => "bool",
             ValorRune _ => "rune",
             ValorVoid _ => "void",
-            ValorArreglo _ => "arreglo",
+            ValorArreglo _ => "slice",
             _ => throw new ArgumentException("Tipo de valor no soportado")
         };
     }
@@ -43,6 +43,11 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             Visit(sentencia);
         }
         return ValorVoid;
+    }
+    //VisitExpresionSentencia
+    public override ValorWrapper VisitExpresionSentencia(LanguageParser.ExpresionSentenciaContext context)
+    {
+        return Visit(context.expresion());
     }
     // VisitBloque
     public override ValorWrapper VisitBloque(LanguageParser.BloqueContext context)
@@ -409,5 +414,78 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
         throw new Exception("Función Join: La Variable: " + identificador + " No es un Arreglo");
     }
+    // VisitFuncionEmbebidaLen
+    public override ValorWrapper VisitFuncionEmbebidaLen(LanguageParser.FuncionEmbebidaLenContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper ArregloActual = EntornoActual.GetVariable(identificador);
 
+        if (ArregloActual is ValorArreglo Arreglo)
+        {
+            return new ValorInt(Arreglo.Valores.Count);
+        }
+        throw new Exception("Función Len: La Variable: " + identificador + " No es un Arreglo");
+    }
+    // VisitFuncionEmbebidaAppend
+    public override ValorWrapper VisitFuncionEmbebidaAppend(LanguageParser.FuncionEmbebidaAppendContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper ArregloActual = EntornoActual.GetVariable(identificador);
+        ValorWrapper ValorNuevo = Visit(context.expresion());
+
+        if (ArregloActual is ValorArreglo Arreglo)
+        {
+            if (!Arreglo.Tipo.Equals(ObtenerTipo(ValorNuevo), StringComparison.Ordinal))
+            {
+                throw new Exception("Función Append: Tipo de Dato Arreglo: " + Arreglo.Tipo + " No Coincide con el Valor: " + ObtenerTipo(ValorNuevo));
+            }
+            Arreglo.Valores.Add(ValorNuevo);
+            return ArregloActual;
+        }
+        throw new Exception("Función Append: La Variable: " + identificador + " No es un Arreglo");
+    }
+    // VisitAccesoArreglo
+    public override ValorWrapper VisitAccesoArreglo(LanguageParser.AccesoArregloContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper ArregloActual = EntornoActual.GetVariable(identificador);
+        ValorWrapper Indice = Visit(context.expresion());
+
+        if (ArregloActual is not ValorArreglo Arreglo)
+            throw new Exception("Acceso Arreglo: La Variable: " + identificador + " No es un Arreglo");
+        
+        if (Indice is not ValorInt IndiceInt)
+            throw new Exception("Acceso Arreglo: Tipo de Dato: " + ObtenerTipo(Indice) + " No es un Entero");
+            
+        if ((IndiceInt.Valor >= 0) && (IndiceInt.Valor < Arreglo.Valores.Count))
+            return Arreglo.Valores[IndiceInt.Valor];
+        else
+            throw new Exception("Acceso Arreglo: Indice: " + IndiceInt.Valor + " Fuera de Rango");
+    }
+    // VisitAsignacionArreglo
+    public override ValorWrapper VisitAsignacionArreglo(LanguageParser.AsignacionArregloContext context)
+    {
+        // numeros[2] = 5
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper ArregloActual = EntornoActual.GetVariable(identificador);
+        ValorWrapper Indice = Visit(context.indice);
+        ValorWrapper ValorNuevo = Visit(context.valornuevo);
+
+        if (ArregloActual is not ValorArreglo Arreglo)
+            throw new Exception("Asignación Arreglo: La Variable: " + identificador + " No es un Arreglo");
+        
+        if (Indice is not ValorInt IndiceInt)
+            throw new Exception("Asignación Arreglo: Tipo de Dato: " + ObtenerTipo(Indice) + " No es un Entero");
+            
+        if ((IndiceInt.Valor >= 0) && (IndiceInt.Valor < Arreglo.Valores.Count))
+        {
+            if (Arreglo.Tipo.Equals(ObtenerTipo(ValorNuevo), StringComparison.Ordinal))
+            {
+                Arreglo.Valores[IndiceInt.Valor] = ValorNuevo;return ValorVoid;
+            }
+            throw new Exception("Asignación Arreglo: Tipo de Dato Arreglo: " + Arreglo.Tipo + " No Coincide con el Valor: " + ObtenerTipo(ValorNuevo));
+        }
+        throw new Exception("Asignación Arreglo: Indice: " + IndiceInt.Valor + " Fuera de Rango");
+    }
+    
 }

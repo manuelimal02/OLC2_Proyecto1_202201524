@@ -16,18 +16,19 @@ declaracion_arreglo: IDENTIFICADOR ':=' '[' ']' TIPO '{' (expresion (',' expresi
 	| 'var' IDENTIFICADOR '[' ']' TIPO  (';')? 														# DeclaracionArregloPorDefecto
 	;
 
-sentencia: expresion (';')? # ExprStmt 
-	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  # FuncionEmbebidaPrintln
-	| '{' declaraciones* '}' # Bloque
+sentencia: expresion (';')? 																		# ExpresionSentencia
+	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  										# FuncionEmbebidaPrintln
+	| '{' declaraciones* '}' 																		# Bloque
 	;
 
 expresion:
- 	  'strconv.Atoi(' expresion ')' (';')?                  # FuncionEmbebidaAtoi
-	| 'strconv.ParseFloat(' expresion ')'(';')?             # FuncionEmbebidaParseFloat
-	| 'reflect.TypeOf(' expresion ')' (';')?                # FuncionEmbebidaReflectTypeOf
-	| 'slices.Index(' IDENTIFICADOR ',' expresion ')' (';')?                 	# FuncionEmbebidaSlicesIndex
-	| 'strings.Join(' IDENTIFICADOR ',' expresion ')' (';')?   					# FuncionEmbebidaStringsJoin
-	| 'len(' IDENTIFICADOR ')' (';')?                      						# FuncionEmbebidaLen
+	'append(' IDENTIFICADOR ',' expresion ')' (';')?      							# FuncionEmbebidaAppend
+ 	|  'strconv.Atoi(' expresion ')' (';')?                  						# FuncionEmbebidaAtoi
+	| 'strconv.ParseFloat(' expresion ')'(';')?             						# FuncionEmbebidaParseFloat
+	| 'reflect.TypeOf(' expresion ')' (';')?                						# FuncionEmbebidaReflectTypeOf
+	| 'slices.Index(' IDENTIFICADOR ',' expresion ')' (';')?                 		# FuncionEmbebidaSlicesIndex
+	| 'strings.Join(' IDENTIFICADOR ',' expresion ')' (';')?   						# FuncionEmbebidaStringsJoin
+	| 'len(' IDENTIFICADOR ')' (';')?                      							# FuncionEmbebidaLen
 	| operador='-' izquierda=expresion                                         		# NegacionUnaria
 	| operador='!' izquierda=expresion                                       		# NegacionLogica
 	| izquierda=expresion operador=('*' | '/' | '%') derecha=expresion              # MultiplicacionDivisionModulo
@@ -36,16 +37,18 @@ expresion:
 	| izquierda=expresion operador=('==' | '!=') derecha=expresion                  # IgualdadDesigualdad
 	| izquierda=expresion operador='&&' derecha=expresion                           # LogicoAnd
 	| izquierda=expresion operador='||' derecha=expresion                           # LogicoOr
-	| IDENTIFICADOR '=' expresion                        # AsignacionVariable
-	| IDENTIFICADOR '+=' expresion                       # AsignacionVariableSuma
-	| IDENTIFICADOR '-=' expresion                       # AsignacionVariableResta
-	| BOOLEANO                                           # Booleano
-	| DECIMAL                                            # Decimal
-	| CARACTER                                           # Caracter
-	| CADENA                                             # Cadena
-	| ENTERO                                             # Entero
-	| IDENTIFICADOR                                      # Identificador
-	| '(' expresion ')'                                  # Parentesis
+	| IDENTIFICADOR '[' expresion ']'                    							# AccesoArreglo
+	| IDENTIFICADOR '[' indice=expresion ']' '=' valornuevo=expresion       		# AsignacionArreglo
+	| IDENTIFICADOR '=' expresion                        							# AsignacionVariable
+	| IDENTIFICADOR '+=' expresion                       							# AsignacionVariableSuma
+	| IDENTIFICADOR '-=' expresion                       							# AsignacionVariableResta
+	| BOOLEANO                                           							# Booleano
+	| DECIMAL                                            							# Decimal
+	| CARACTER                                           							# Caracter
+	| CADENA                                             							# Cadena
+	| ENTERO                                             							# Entero
+	| IDENTIFICADOR                                      							# Identificador
+	| '(' expresion ')'                                  							# Parentesis
 	;
 
 TIPO: 'int' 	

@@ -80,12 +80,12 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitDeclaracionArregloPorDefecto([NotNull] LanguageParser.DeclaracionArregloPorDefectoContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>ExprStmt</c>
+	/// Visit a parse tree produced by the <c>ExpresionSentencia</c>
 	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitExprStmt([NotNull] LanguageParser.ExprStmtContext context);
+	Result VisitExpresionSentencia([NotNull] LanguageParser.ExpresionSentenciaContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>FuncionEmbebidaPrintln</c>
 	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
@@ -107,6 +107,104 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitAsignacionVariable([NotNull] LanguageParser.AsignacionVariableContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Booleano</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitBooleano([NotNull] LanguageParser.BooleanoContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaSlicesIndex</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaSlicesIndex([NotNull] LanguageParser.FuncionEmbebidaSlicesIndexContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>NegacionUnaria</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNegacionUnaria([NotNull] LanguageParser.NegacionUnariaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>AsignacionArreglo</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAsignacionArreglo([NotNull] LanguageParser.AsignacionArregloContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>SumaResta</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSumaResta([NotNull] LanguageParser.SumaRestaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>LogicoAnd</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogicoAnd([NotNull] LanguageParser.LogicoAndContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>AsignacionVariableSuma</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAsignacionVariableSuma([NotNull] LanguageParser.AsignacionVariableSumaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>AccesoArreglo</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAccesoArreglo([NotNull] LanguageParser.AccesoArregloContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaStringsJoin</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaStringsJoin([NotNull] LanguageParser.FuncionEmbebidaStringsJoinContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>LogicoOr</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogicoOr([NotNull] LanguageParser.LogicoOrContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Decimal</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDecimal([NotNull] LanguageParser.DecimalContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Relacional</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRelacional([NotNull] LanguageParser.RelacionalContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaAtoi</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitFuncionEmbebidaAtoi([NotNull] LanguageParser.FuncionEmbebidaAtoiContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>MultiplicacionDivisionModulo</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMultiplicacionDivisionModulo([NotNull] LanguageParser.MultiplicacionDivisionModuloContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>IgualdadDesigualdad</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
@@ -136,55 +234,6 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitCadena([NotNull] LanguageParser.CadenaContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>Booleano</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitBooleano([NotNull] LanguageParser.BooleanoContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>FuncionEmbebidaSlicesIndex</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitFuncionEmbebidaSlicesIndex([NotNull] LanguageParser.FuncionEmbebidaSlicesIndexContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>NegacionUnaria</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitNegacionUnaria([NotNull] LanguageParser.NegacionUnariaContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>SumaResta</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitSumaResta([NotNull] LanguageParser.SumaRestaContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>LogicoAnd</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitLogicoAnd([NotNull] LanguageParser.LogicoAndContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>AsignacionVariableSuma</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAsignacionVariableSuma([NotNull] LanguageParser.AsignacionVariableSumaContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>FuncionEmbebidaStringsJoin</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitFuncionEmbebidaStringsJoin([NotNull] LanguageParser.FuncionEmbebidaStringsJoinContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>NegacionLogica</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
@@ -199,33 +248,12 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitCaracter([NotNull] LanguageParser.CaracterContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>LogicoOr</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitLogicoOr([NotNull] LanguageParser.LogicoOrContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>FuncionEmbebidaReflectTypeOf</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitFuncionEmbebidaReflectTypeOf([NotNull] LanguageParser.FuncionEmbebidaReflectTypeOfContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>Decimal</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitDecimal([NotNull] LanguageParser.DecimalContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>Relacional</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitRelacional([NotNull] LanguageParser.RelacionalContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Entero</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
@@ -248,12 +276,12 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitFuncionEmbebidaLen([NotNull] LanguageParser.FuncionEmbebidaLenContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>FuncionEmbebidaAtoi</c>
+	/// Visit a parse tree produced by the <c>FuncionEmbebidaAppend</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitFuncionEmbebidaAtoi([NotNull] LanguageParser.FuncionEmbebidaAtoiContext context);
+	Result VisitFuncionEmbebidaAppend([NotNull] LanguageParser.FuncionEmbebidaAppendContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Identificador</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
@@ -261,12 +289,5 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitIdentificador([NotNull] LanguageParser.IdentificadorContext context);
-	/// <summary>
-	/// Visit a parse tree produced by the <c>MultiplicacionDivisionModulo</c>
-	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitMultiplicacionDivisionModulo([NotNull] LanguageParser.MultiplicacionDivisionModuloContext context);
 }
 } // namespace Analizador
