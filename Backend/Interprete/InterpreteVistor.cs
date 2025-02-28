@@ -504,34 +504,50 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
         return Condicion;
     }
-
     // VisitSentenciaSwitch
     public override ValorWrapper VisitSentenciaSwitch(LanguageParser.SentenciaSwitchContext context)
     {  
         ValorWrapper Condicion = Visit(context.condicion);
         bool CasoCoincide = false;
+
         foreach (var caso in context.casos_switch())
         {
             ValorWrapper CondicionCaso = Visit(caso.expresion());
+
             if (Condicion.Equals(CondicionCaso))
             {
                 CasoCoincide = true;
-                foreach (var sentencia in caso.declaraciones())
+                try
                 {
-                    Visit(sentencia);
+                    foreach (var sentencia in caso.declaraciones())
+                    {
+                        Visit(sentencia);
+                    }
                 }
-                break;
+                catch (ExceptionBreack)
+                {
+                    break;
+                }
+                break; 
             }
         }
         if (!CasoCoincide && context.default_switch() != null)
         {
-            foreach (var sentencia in context.default_switch().declaraciones())
+            try
             {
-                Visit(sentencia);
+                foreach (var sentencia in context.default_switch().declaraciones())
+                {
+                    Visit(sentencia);
+                }
+            }
+            catch (ExceptionBreack)
+            {
+                // Ignorar y salir del switch
             }
         }
         return ValorVoid;
     }
+
 
     //VisitSentenciaBreak
     public override ValorWrapper VisitSentenciaBreak(LanguageParser.SentenciaBreakContext context)
