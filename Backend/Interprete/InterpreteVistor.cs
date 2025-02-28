@@ -487,5 +487,22 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
         throw new Exception("Asignación Arreglo: Indice: " + IndiceInt.Valor + " Fuera de Rango");
     }
-    
+
+    // VisitSentenciaIf
+    public override ValorWrapper VisitSentenciaIf(LanguageParser.SentenciaIfContext context)
+    {
+        ValorWrapper Condicion = Visit(context.expresion());
+        if (Condicion is not ValorBoolean CondicionBoolean)
+            throw new Exception("Sentencia If: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano");
+
+        if (CondicionBoolean.Valor)
+        {
+            Visit(context.sentencia(0));
+        }
+        else if (context.sentencia().Length > 1)
+        {
+            Visit(context.sentencia(1));
+        }
+        return Condicion;
+    }
 }

@@ -19,11 +19,12 @@ declaracion_arreglo: IDENTIFICADOR ':=' '[' ']' TIPO '{' (expresion (',' expresi
 sentencia: expresion (';')? 																		# ExpresionSentencia
 	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  										# FuncionEmbebidaPrintln
 	| '{' declaraciones* '}' 																		# Bloque
+	| 'if' ('(' condicion=expresion ')' | condicion=expresion) sentencia ('else' sentencia)? 		# SentenciaIf
 	;
 
 expresion:
 	'append(' IDENTIFICADOR ',' expresion ')' (';')?      							# FuncionEmbebidaAppend
- 	|  'strconv.Atoi(' expresion ')' (';')?                  						# FuncionEmbebidaAtoi
+ 	| 'strconv.Atoi(' expresion ')' (';')?                  						# FuncionEmbebidaAtoi
 	| 'strconv.ParseFloat(' expresion ')'(';')?             						# FuncionEmbebidaParseFloat
 	| 'reflect.TypeOf(' expresion ')' (';')?                						# FuncionEmbebidaReflectTypeOf
 	| 'slices.Index(' IDENTIFICADOR ',' expresion ')' (';')?                 		# FuncionEmbebidaSlicesIndex

@@ -101,6 +101,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitBloque([NotNull] LanguageParser.BloqueContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>SentenciaIf</c>
+	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSentenciaIf([NotNull] LanguageParser.SentenciaIfContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>AsignacionVariable</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
