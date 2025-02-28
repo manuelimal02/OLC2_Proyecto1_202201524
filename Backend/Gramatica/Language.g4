@@ -23,6 +23,7 @@ sentencia: expresion (';')? 																				# ExpresionSentencia
 	| 'switch' ('(' condicion=expresion ')' | condicion=expresion) '{' casos_switch* (default_switch)? '}' 	# SentenciaSwitch
 	| 'for' ('(' condicion=expresion ')' | condicion=expresion) sentencia 									# SentenciaForSimple
 	| 'for' for_init condicion=expresion ';' incremento=expresion sentencia 								# SentenciaForCompuesta
+	| 'for' indice=IDENTIFICADOR ',' valor=IDENTIFICADOR ':=' 'range' slice=IDENTIFICADOR sentencia 		# SentenciaForRange
 	| 'break' (';')? 																						# SentenciaBreak
 	| 'continue' (';')? 																					# SentenciaContinue
 	| 'return' expresion? (';')? 																			# SentenciaReturn

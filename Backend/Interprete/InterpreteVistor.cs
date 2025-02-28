@@ -610,4 +610,31 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             CondicionWhile = (ValorBoolean)Condicion;
         }
     }
+    // VisitSentenciaForRange
+    public override ValorWrapper VisitSentenciaForRange(LanguageParser.SentenciaForRangeContext context)
+    {
+        string Indice = context.indice.Text;
+        string Valor = context.valor.Text;
+        string Slice = context.slice.Text;
+
+        ValorWrapper Arreglo = EntornoActual.GetVariable(Slice);
+
+        if (Arreglo is not ValorArreglo Arreglo1)
+            throw new Exception("Sentencia For Range: La Variable: " + Slice + " No es un Arreglo");
+
+        for (int i = 0; i < Arreglo1.Valores.Count; i++)
+        {
+            // Crear un nuevo entorno para cada iteración
+            Entorno EntornoPrevio = EntornoActual;
+            EntornoActual = new Entorno(EntornoPrevio);
+            // Asignar índice y valor dentro del nuevo entorno
+            EntornoActual.DeclaracionVariable(Indice, new ValorInt(i));
+            EntornoActual.DeclaracionVariable(Valor, Arreglo1.Valores[i]);
+            // Ejecutar la sentencia dentro del for
+            Visit(context.sentencia());
+            EntornoActual = EntornoPrevio;
+        }
+        return ValorVoid;
+    }
+
 }

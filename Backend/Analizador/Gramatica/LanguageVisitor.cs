@@ -129,6 +129,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitSentenciaForCompuesta([NotNull] LanguageParser.SentenciaForCompuestaContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>SentenciaForRange</c>
+	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSentenciaForRange([NotNull] LanguageParser.SentenciaForRangeContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>SentenciaBreak</c>
 	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
 	/// </summary>
