@@ -24,7 +24,7 @@ public class Entorno
       
     }
 
-    public void DeclracionVariable(string identificador, ValorWrapper valor)
+    public void DeclaracionVariable(string identificador, ValorWrapper valor)
     {
         if (Variable.ContainsKey(identificador)){
             throw new Exception("Variable: " + identificador + " Ya Existe");

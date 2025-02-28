@@ -21,6 +21,9 @@ sentencia: expresion (';')? 																				# ExpresionSentencia
 	| '{' declaraciones* '}' 																				# Bloque
 	| 'if' ('(' condicion=expresion ')' | condicion=expresion) sentencia ('else' sentencia)? 				# SentenciaIf
 	| 'switch' ('(' condicion=expresion ')' | condicion=expresion) '{' casos_switch* (default_switch)? '}' 	# SentenciaSwitch
+	| 'break' (';')? 																						# SentenciaBreak
+	| 'continue' (';')? 																					# SentenciaContinue
+	| 'return' expresion? (';')? 																			# SentenciaReturn
 	;
 
 casos_switch: 'case' expresion ':' declaraciones*; 														

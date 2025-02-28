@@ -103,12 +103,12 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string tipo = context.TIPO().GetText();
         if (expresion is ValorInt && tipo == "float64"){
             expresion = new ValorFloat64(float.Parse(ObtenerValor(expresion), CultureInfo.InvariantCulture));
-            EntornoActual.DeclracionVariable(identificador, expresion);
+            EntornoActual.DeclaracionVariable(identificador, expresion);
             return ValorVoid;
         } else if (!ObtenerTipo(expresion).Equals(tipo, StringComparison.Ordinal)){
             throw new Exception("Declaración: Tipo de Dato: " + tipo + " No Coincide con el Valor: " + ObtenerTipo(expresion));
         }else{
-            EntornoActual.DeclracionVariable(identificador, expresion);
+            EntornoActual.DeclaracionVariable(identificador, expresion);
             return ValorVoid;
         }
     }
@@ -117,7 +117,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper expresion = Visit(context.expresion());
-        EntornoActual.DeclracionVariable(identificador, expresion);
+        EntornoActual.DeclaracionVariable(identificador, expresion);
         return ValorVoid;
     }
     // VisitDeclaracionPorDefecto
@@ -127,19 +127,19 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string tipo = context.TIPO().GetText();
         switch (tipo){
             case "int":
-                EntornoActual.DeclracionVariable(identificador, new ValorInt(0));
+                EntornoActual.DeclaracionVariable(identificador, new ValorInt(0));
                 break;
             case "float64":
-                EntornoActual.DeclracionVariable(identificador, new ValorFloat64(0));
+                EntornoActual.DeclaracionVariable(identificador, new ValorFloat64(0));
                 break;
             case "string":
-                EntornoActual.DeclracionVariable(identificador, new ValorString(""));
+                EntornoActual.DeclaracionVariable(identificador, new ValorString(""));
                 break;
             case "bool":
-                EntornoActual.DeclracionVariable(identificador, new ValorBoolean(false));
+                EntornoActual.DeclaracionVariable(identificador, new ValorBoolean(false));
                 break;
             case "rune":
-                EntornoActual.DeclracionVariable(identificador, new ValorRune('0'));
+                EntornoActual.DeclaracionVariable(identificador, new ValorRune('0'));
                 break;
             default:
                 throw new Exception("Tipo de Dato: " + tipo + " No Encontrado");
@@ -353,7 +353,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ArregloAuxiliar.Add(ValoresArreglo);
         }
         ValorWrapper NuevoArreglo = new ValorArreglo(ArregloAuxiliar, TipoArreglo);
-        EntornoActual.DeclracionVariable(identificador, NuevoArreglo);
+        EntornoActual.DeclaracionVariable(identificador, NuevoArreglo);
         return ValorVoid;
     }
     // VisitDeclaracionArregloPorDefecto
@@ -363,7 +363,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string TipoArreglo = context.TIPO().GetText();
         List<ValorWrapper> ArregloAuxiliar = new List<ValorWrapper>();
         ValorWrapper NuevoArreglo = new ValorArreglo(ArregloAuxiliar, TipoArreglo);
-        EntornoActual.DeclracionVariable(identificador, NuevoArreglo);
+        EntornoActual.DeclaracionVariable(identificador, NuevoArreglo);
         return ValorVoid;
     }
 
@@ -532,4 +532,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
         return ValorVoid;
     }
+
+    //VisitSentenciaBreak
+    //VisitSentenciaContinue
 }
