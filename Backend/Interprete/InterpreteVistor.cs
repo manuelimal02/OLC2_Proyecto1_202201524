@@ -534,5 +534,42 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     }
 
     //VisitSentenciaBreak
+    public override ValorWrapper VisitSentenciaBreak(LanguageParser.SentenciaBreakContext context)
+    {
+        throw new ExceptionBreack();
+    }
     //VisitSentenciaContinue
+    public override ValorWrapper VisitSentenciaContinue(LanguageParser.SentenciaContinueContext context)
+    {
+        throw new ExceptionContinue();
+    }
+    // VisitSentenciaForSimple
+   public override ValorWrapper VisitSentenciaForSimple(LanguageParser.SentenciaForSimpleContext context)
+    {
+        ValorWrapper Condicion = Visit(context.condicion);
+        if (Condicion is not ValorBoolean CondicionWhile)
+            throw new Exception("Sentencia For: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano");
+        while (CondicionWhile.Valor)
+        {
+            try
+            {
+                Visit(context.sentencia());
+            }
+            catch (ExceptionContinue)
+            {
+                Visit(context.expresion());
+                Condicion = Visit(context.condicion);
+                CondicionWhile = (ValorBoolean)Condicion;
+                continue;
+            }
+            catch (ExceptionBreack)
+            {
+                break;
+            }
+            Visit(context.expresion());
+            Condicion = Visit(context.condicion);
+            CondicionWhile = (ValorBoolean)Condicion;
+        }
+        return ValorVoid;
+    }
 }

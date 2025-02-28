@@ -115,6 +115,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitSentenciaSwitch([NotNull] LanguageParser.SentenciaSwitchContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>SentenciaForSimple</c>
+	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitSentenciaForSimple([NotNull] LanguageParser.SentenciaForSimpleContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>SentenciaBreak</c>
 	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
 	/// </summary>

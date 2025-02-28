@@ -21,13 +21,19 @@ sentencia: expresion (';')? 																				# ExpresionSentencia
 	| '{' declaraciones* '}' 																				# Bloque
 	| 'if' ('(' condicion=expresion ')' | condicion=expresion) sentencia ('else' sentencia)? 				# SentenciaIf
 	| 'switch' ('(' condicion=expresion ')' | condicion=expresion) '{' casos_switch* (default_switch)? '}' 	# SentenciaSwitch
+	| 'for' ('(' condicion=expresion ')' | condicion=expresion) sentencia 									# SentenciaForSimple
+	| 'for' ('('for_init expresion ';' expresion ')' | for_init expresion ';' expresion) sentencia 													# SentenciaForCompleja
 	| 'break' (';')? 																						# SentenciaBreak
 	| 'continue' (';')? 																					# SentenciaContinue
 	| 'return' expresion? (';')? 																			# SentenciaReturn
 	;
 
 casos_switch: 'case' expresion ':' declaraciones*; 														
-default_switch: 'default' ':' declaraciones*; 														
+default_switch: 'default' ':' declaraciones*; 	
+
+for_init: declaracion_variable 
+	| expresion
+	;
 
 expresion:
 	'append(' IDENTIFICADOR ',' expresion ')' (';')?      							# FuncionEmbebidaAppend
