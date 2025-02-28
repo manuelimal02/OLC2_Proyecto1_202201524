@@ -22,7 +22,7 @@ sentencia: expresion (';')? 																				# ExpresionSentencia
 	| 'if' ('(' condicion=expresion ')' | condicion=expresion) sentencia ('else' sentencia)? 				# SentenciaIf
 	| 'switch' ('(' condicion=expresion ')' | condicion=expresion) '{' casos_switch* (default_switch)? '}' 	# SentenciaSwitch
 	| 'for' ('(' condicion=expresion ')' | condicion=expresion) sentencia 									# SentenciaForSimple
-	| 'for' ('('for_init expresion ';' expresion ')' | for_init expresion ';' expresion) sentencia 													# SentenciaForCompleja
+	| 'for' for_init condicion=expresion ';' incremento=expresion sentencia 								# SentenciaForCompuesta
 	| 'break' (';')? 																						# SentenciaBreak
 	| 'continue' (';')? 																					# SentenciaContinue
 	| 'return' expresion? (';')? 																			# SentenciaReturn

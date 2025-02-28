@@ -548,7 +548,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         ValorWrapper Condicion = Visit(context.condicion);
         if (Condicion is not ValorBoolean CondicionWhile)
-            throw new Exception("Sentencia For: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano");
+            throw new Exception("Sentencia For Simple: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano");
         while (CondicionWhile.Valor)
         {
             try
@@ -571,5 +571,43 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             CondicionWhile = (ValorBoolean)Condicion;
         }
         return ValorVoid;
+    }
+    // VisitSentenciaForCompuesta
+    public override ValorWrapper VisitSentenciaForCompuesta(LanguageParser.SentenciaForCompuestaContext context)
+    {
+        Entorno EntornoPrevio = EntornoActual;
+        EntornoActual = new Entorno(EntornoActual);
+        Visit(context.for_init());
+        VisitCuerpoFor(context);
+        EntornoActual = EntornoPrevio;
+        return ValorVoid;
+    }
+    public void VisitCuerpoFor(LanguageParser.SentenciaForCompuestaContext context)
+    {
+        ValorWrapper Condicion = Visit(context.condicion);
+        if (Condicion is not ValorBoolean CondicionWhile)
+            throw new Exception("Sentencia For Compuesto: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano");
+
+        while (CondicionWhile.Valor) 
+        {
+            try 
+            {
+                Visit(context.sentencia());
+            }
+            catch (ExceptionContinue) 
+            {
+                Visit(context.incremento);
+                Condicion = Visit(context.condicion);
+                CondicionWhile = (ValorBoolean)Condicion;
+                continue;
+            }
+            catch (ExceptionBreack) 
+            {
+                return;
+            }
+            Visit(context.incremento);
+            Condicion = Visit(context.condicion);
+            CondicionWhile = (ValorBoolean)Condicion;
+        }
     }
 }
