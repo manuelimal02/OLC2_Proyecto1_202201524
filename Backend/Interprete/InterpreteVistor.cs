@@ -465,7 +465,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     // VisitAsignacionArreglo
     public override ValorWrapper VisitAsignacionArreglo(LanguageParser.AsignacionArregloContext context)
     {
-        // numeros[2] = 5
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper ArregloActual = EntornoActual.GetVariable(identificador);
         ValorWrapper Indice = Visit(context.indice);
@@ -504,5 +503,33 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             Visit(context.sentencia(1));
         }
         return Condicion;
+    }
+
+    // VisitSentenciaSwitch
+    public override ValorWrapper VisitSentenciaSwitch(LanguageParser.SentenciaSwitchContext context)
+    {  
+        ValorWrapper Condicion = Visit(context.condicion);
+        bool CasoCoincide = false;
+        foreach (var caso in context.casos_switch())
+        {
+            ValorWrapper CondicionCaso = Visit(caso.expresion());
+            if (Condicion.Equals(CondicionCaso))
+            {
+                CasoCoincide = true;
+                foreach (var sentencia in caso.declaraciones())
+                {
+                    Visit(sentencia);
+                }
+                break;
+            }
+        }
+        if (!CasoCoincide && context.default_switch() != null)
+        {
+            foreach (var sentencia in context.default_switch().declaraciones())
+            {
+                Visit(sentencia);
+            }
+        }
+        return ValorVoid;
     }
 }

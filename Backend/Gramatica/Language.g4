@@ -16,11 +16,15 @@ declaracion_arreglo: IDENTIFICADOR ':=' '[' ']' TIPO '{' (expresion (',' expresi
 	| 'var' IDENTIFICADOR '[' ']' TIPO  (';')? 														# DeclaracionArregloPorDefecto
 	;
 
-sentencia: expresion (';')? 																		# ExpresionSentencia
-	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  										# FuncionEmbebidaPrintln
-	| '{' declaraciones* '}' 																		# Bloque
-	| 'if' ('(' condicion=expresion ')' | condicion=expresion) sentencia ('else' sentencia)? 		# SentenciaIf
+sentencia: expresion (';')? 																				# ExpresionSentencia
+	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  												# FuncionEmbebidaPrintln
+	| '{' declaraciones* '}' 																				# Bloque
+	| 'if' ('(' condicion=expresion ')' | condicion=expresion) sentencia ('else' sentencia)? 				# SentenciaIf
+	| 'switch' ('(' condicion=expresion ')' | condicion=expresion) '{' casos_switch* (default_switch)? '}' 	# SentenciaSwitch
 	;
+
+casos_switch: 'case' expresion ':' declaraciones*; 														
+default_switch: 'default' ':' declaraciones*; 														
 
 expresion:
 	'append(' IDENTIFICADOR ',' expresion ')' (';')?      							# FuncionEmbebidaAppend
