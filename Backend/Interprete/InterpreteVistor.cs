@@ -481,7 +481,8 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         {
             if (Arreglo.Tipo.Equals(ObtenerTipo(ValorNuevo), StringComparison.Ordinal))
             {
-                Arreglo.Valores[IndiceInt.Valor] = ValorNuevo;return ValorVoid;
+                Arreglo.Valores[IndiceInt.Valor] = ValorNuevo;
+                return ValorVoid;
             }
             throw new Exception("Asignación Arreglo: Tipo de Dato Arreglo: " + Arreglo.Tipo + " No Coincide con el Valor: " + ObtenerTipo(ValorNuevo));
         }
@@ -741,7 +742,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             int indice = IndicesMatriz[i];
             // Verificar que el índice está dentro de los límites
             if (indice < 0 || indice >= SubMatrixAuxiliar.Valores.Count)
-                throw new Exception($"Error: Índice fuera de rango: {indice}. Tamaño de la matriz: {SubMatrixAuxiliar.Valores.Count}");
+                throw new Exception($"Error Asignación: Índice fuera de rango: {indice}. Tamaño de la matriz: {SubMatrixAuxiliar.Valores.Count}");
             // Avanzar en la matriz
             if (SubMatrixAuxiliar.Valores[indice] is ValorArreglo siguienteNivel)
             {
@@ -749,15 +750,59 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             else
             {
-                throw new Exception($"Error: La posición [{string.Join(", ", IndicesMatriz.Take(i + 1))}] no contiene una submatriz.");
+                throw new Exception($"Error Asignación: La posición [{string.Join(", ", IndicesMatriz.Take(i + 1))}] no contiene una submatriz.");
             }
         }
         // Asignar el nuevo valor en la última posición
         int ultimoIndice = IndicesMatriz[^1]; // Último índice de la lista
         // Verificar que el índice final esté dentro de los límites
         if (ultimoIndice < 0 || ultimoIndice >= SubMatrixAuxiliar.Valores.Count)
-            throw new Exception($"Error: Índice fuera de rango en la última dimensión: {ultimoIndice}. Tamaño: {SubMatrixAuxiliar.Valores.Count}");
+            throw new Exception($"Error Asignación: Índice fuera de rango en la última dimensión: {ultimoIndice}. Tamaño: {SubMatrixAuxiliar.Valores.Count}");
         SubMatrixAuxiliar.Valores[ultimoIndice] = NuevoValor;
         return ValorVoid;
     }
+
+    // VisitAccesoMatriz
+    public override ValorWrapper VisitAccesoMatriz(LanguageParser.AccesoMatrizContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper MatrizActual = EntornoActual.GetVariable(identificador);
+
+        if (MatrizActual is not ValorArreglo Matriz)
+            throw new Exception("Acceso Matriz: La Variable '" + identificador + "' no es una Matriz.");
+        
+        // Obtener los índices
+        List<int> IndicesMatriz = new List<int>();
+        foreach (var elemento in context.expresion())
+        {
+            ValorWrapper indice = Visit(elemento);
+            if (indice is not ValorInt indiceInt)
+                throw new Exception($"Acceso Matriz: Índice '{ObtenerTipo(indice)}' no es un entero.");
+            IndicesMatriz.Add(indiceInt.Valor);
+        }
+
+        // Navegar por los niveles de la matriz
+        ValorArreglo SubMatriz = Matriz;
+        for (int i = 0; i < IndicesMatriz.Count; i++)
+        {
+            int indice = IndicesMatriz[i];
+
+            // Verificar que el índice está dentro del rango
+            if (indice < 0 || indice >= SubMatriz.Valores.Count)
+                throw new Exception($"Error Acceso: Índice fuera de rango: {indice}. Tamaño del arreglo: {SubMatriz.Valores.Count}");
+
+            // Si es el último índice, retornar el valor
+            if (i == IndicesMatriz.Count - 1)
+                return SubMatriz.Valores[indice];
+
+            // Verificar que el siguiente nivel sigue siendo una matriz
+            if (SubMatriz.Valores[indice] is not ValorArreglo nuevaSubMatriz)
+                throw new Exception($"Error Acceso: Intento de acceso en un nivel inválido. La posición [{string.Join(", ", IndicesMatriz)}] no contiene una matriz.");
+            
+            SubMatriz = nuevaSubMatriz;
+        }
+
+        throw new Exception("Acceso Matriz: No se pudo acceder correctamente a la matriz.");
+    }
+
 }

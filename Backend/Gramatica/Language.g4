@@ -73,9 +73,10 @@ expresion:
 	| izquierda=expresion operador=('==' | '!=') derecha=expresion                  # IgualdadDesigualdad
 	| izquierda=expresion operador='&&' derecha=expresion                           # LogicoAnd
 	| izquierda=expresion operador='||' derecha=expresion                           # LogicoOr
+	| IDENTIFICADOR ('[' expresion ']')+                                            # AccesoMatriz
 	| IDENTIFICADOR '[' expresion ']'                    							# AccesoArreglo
 	| IDENTIFICADOR '[' indice=expresion ']' '=' valornuevo=expresion       		# AsignacionArreglo
-	| IDENTIFICADOR ('[' expresion ']')* '=' valornuevo=expresion  					# AsignacionMatriz
+	| IDENTIFICADOR ('[' expresion ']')+ '=' valornuevo=expresion  					# AsignacionMatriz
 	| IDENTIFICADOR '=' expresion                        							# AsignacionVariable
 	| IDENTIFICADOR '+=' expresion                       							# AsignacionVariableSuma
 	| IDENTIFICADOR '-=' expresion                       							# AsignacionVariableResta

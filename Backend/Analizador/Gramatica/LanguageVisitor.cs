@@ -219,6 +219,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitAsignacionVariable([NotNull] LanguageParser.AsignacionVariableContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>AccesoMatriz</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAccesoMatriz([NotNull] LanguageParser.AccesoMatrizContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>AsignacionMatriz</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
