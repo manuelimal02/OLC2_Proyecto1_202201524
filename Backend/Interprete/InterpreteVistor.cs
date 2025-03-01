@@ -180,7 +180,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         if (valor is ValorArreglo Arreglo)
         {
-            Console.WriteLine("Arreglo: " + Arreglo.Valores);
             return "[" + string.Join(", ", Arreglo.Valores.Select(ObtenerRepresentacion)) + "]";
         }
         return ObtenerValor(valor);
@@ -190,7 +189,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         
         ValorWrapper expresion = Visit(context.expresion());
-        Console.WriteLine(ObtenerTipo(expresion));
         if (expresion is ValorString){
             if (int.TryParse(ObtenerValor(expresion), out int result)){
                 return new ValorInt(result);
@@ -715,9 +713,51 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper MatrizActual = EntornoActual.GetVariable(identificador);
-        ValorWrapper ValorNuevo = Visit(context.valornuevo);
+        ValorWrapper NuevoValor = Visit(context.valornuevo);
+        
+        if (MatrizActual is not ValorArreglo Matriz)
+            throw new Exception("Asignación Matriz: La Variable "+ identificador + "no es una Matriz");
+        
+        if (!Matriz.Tipo.Equals(ObtenerTipo(NuevoValor), StringComparison.Ordinal))
+            throw new Exception("Asignación Matriz: Tipo de dato de la matriz "+Matriz.Tipo+" no coincide con el valor "+ObtenerTipo(NuevoValor)+" .");
+
+        // Obtener los índices
+        List<int> IndicesMatriz = new List<int>();
+        foreach (var elemento in context.expresion())
+        {
+            ValorWrapper indice = Visit(elemento);
+            if (indice is not ValorInt indiceInt)
+                throw new Exception($"Asignación Matriz: Índice '{ObtenerTipo(indice)}' no es un entero.");
+            IndicesMatriz.Add(indiceInt.Valor);
+        }
+        if (IndicesMatriz.Count > 0)
+        {
+            IndicesMatriz.RemoveAt(IndicesMatriz.Count - 1);
+        }
+        // Navegar por los niveles de la matriz hasta el penúltimo índice
+        ValorArreglo SubMatrixAuxiliar = Matriz;
+        for (int i = 0; i < IndicesMatriz.Count - 1; i++)
+        {
+            int indice = IndicesMatriz[i];
+            // Verificar que el índice está dentro de los límites
+            if (indice < 0 || indice >= SubMatrixAuxiliar.Valores.Count)
+                throw new Exception($"Error: Índice fuera de rango: {indice}. Tamaño de la matriz: {SubMatrixAuxiliar.Valores.Count}");
+            // Avanzar en la matriz
+            if (SubMatrixAuxiliar.Valores[indice] is ValorArreglo siguienteNivel)
+            {
+                SubMatrixAuxiliar = siguienteNivel;
+            }
+            else
+            {
+                throw new Exception($"Error: La posición [{string.Join(", ", IndicesMatriz.Take(i + 1))}] no contiene una submatriz.");
+            }
+        }
+        // Asignar el nuevo valor en la última posición
+        int ultimoIndice = IndicesMatriz[^1]; // Último índice de la lista
+        // Verificar que el índice final esté dentro de los límites
+        if (ultimoIndice < 0 || ultimoIndice >= SubMatrixAuxiliar.Valores.Count)
+            throw new Exception($"Error: Índice fuera de rango en la última dimensión: {ultimoIndice}. Tamaño: {SubMatrixAuxiliar.Valores.Count}");
+        SubMatrixAuxiliar.Valores[ultimoIndice] = NuevoValor;
         return ValorVoid;
     }
-
-
 }
