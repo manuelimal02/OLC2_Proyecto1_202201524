@@ -2,7 +2,8 @@ grammar Language;
 
 program: declaraciones*;
 
-declaraciones: declaracion_arreglo 
+declaraciones:declaracion_matriz
+	| declaracion_arreglo 
 	| declaracion_variable
 	| sentencia
 	;
@@ -15,6 +16,26 @@ declaracion_variable: 'var' IDENTIFICADOR TIPO '=' expresion (';')? # Declaracio
 declaracion_arreglo: IDENTIFICADOR ':=' '[' ']' TIPO '{' (expresion (',' expresion)*) '}' (';')? 	# DeclaracionArregloExplicita
 	| 'var' IDENTIFICADOR '[' ']' TIPO  (';')? 														# DeclaracionArregloPorDefecto
 	;
+
+declaracion_matriz : IDENTIFICADOR ':=' dimensiones TIPO contenido_matriz (';')?  # DeclaracionMatrizExplicita
+    ;
+
+dimensiones : '[' ']' dimensiones?
+    ;
+
+contenido_matriz : '{' elementos_matriz? '}'
+    ;
+
+elementos_matriz : elemento_matriz (',' elemento_matriz)* ','?
+    ;
+
+elemento_matriz: contenido_matriz 
+    | lista_valores
+    ;
+
+lista_valores
+    : '{' (expresion (',' expresion)* ','?)? '}'
+    ;
 
 sentencia: expresion (';')? 																				# ExpresionSentencia
 	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  												# FuncionEmbebidaPrintln
@@ -54,6 +75,7 @@ expresion:
 	| izquierda=expresion operador='||' derecha=expresion                           # LogicoOr
 	| IDENTIFICADOR '[' expresion ']'                    							# AccesoArreglo
 	| IDENTIFICADOR '[' indice=expresion ']' '=' valornuevo=expresion       		# AsignacionArreglo
+	| IDENTIFICADOR ('[' expresion ']')* '=' valornuevo=expresion  					# AsignacionMatriz
 	| IDENTIFICADOR '=' expresion                        							# AsignacionVariable
 	| IDENTIFICADOR '+=' expresion                       							# AsignacionVariableSuma
 	| IDENTIFICADOR '-=' expresion                       							# AsignacionVariableResta

@@ -165,21 +165,25 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)
     {
         List<string> ValoresSalida = new List<string>();
+
         foreach (var expre in context.expresion())
         {
             ValorWrapper expresion = Visit(expre);
-            if (expresion is ValorArreglo Arreglo)
-            {
-                string ArregloString = "[" + string.Join(" ", Arreglo.Valores.Select(valor => ObtenerValor(valor))) + "]";
-                ValoresSalida.Add(ArregloString);
-            }
-            else
-            {
-                ValoresSalida.Add(ObtenerValor(expresion));
-            }
+            ValoresSalida.Add(ObtenerRepresentacion(expresion));
         }
+
         Salida += string.Join(" ", ValoresSalida) + "\n";
         return ValorVoid;
+    }
+
+    private string ObtenerRepresentacion(ValorWrapper valor)
+    {
+        if (valor is ValorArreglo Arreglo)
+        {
+            Console.WriteLine("Arreglo: " + Arreglo.Valores);
+            return "[" + string.Join(", ", Arreglo.Valores.Select(ObtenerRepresentacion)) + "]";
+        }
+        return ObtenerValor(valor);
     }
     // VisitFuncionEmbebidaAtoi
     public override ValorWrapper VisitFuncionEmbebidaAtoi(LanguageParser.FuncionEmbebidaAtoiContext context)
@@ -366,7 +370,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         EntornoActual.DeclaracionVariable(identificador, NuevoArreglo);
         return ValorVoid;
     }
-
     // VisitFuncionEmbebidaSlicesIndex
     public override ValorWrapper VisitFuncionEmbebidaSlicesIndex(LanguageParser.FuncionEmbebidaSlicesIndexContext context)
     {
@@ -547,8 +550,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
         return ValorVoid;
     }
-
-
     //VisitSentenciaBreak
     public override ValorWrapper VisitSentenciaBreak(LanguageParser.SentenciaBreakContext context)
     {
@@ -652,5 +653,71 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
         return ValorVoid;
     }
+    public override ValorWrapper VisitDeclaracionMatrizExplicita(LanguageParser.DeclaracionMatrizExplicitaContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        string TipoMatriz = context.TIPO().GetText();
+        // Construir la Matriz visitando el contenido
+        ValorWrapper Matriz = VisitContenidoMatriz(context.contenido_matriz(), TipoMatriz);
+        EntornoActual.DeclaracionVariable(identificador, Matriz);
+        return ValorVoid;
+    }
+
+    private ValorWrapper VisitContenidoMatriz(LanguageParser.Contenido_matrizContext context, string TipoMatriz)
+    {
+        // Lista para almacenar todos los elementos de este nivel
+        List<ValorWrapper> elementos = new List<ValorWrapper>();
+        // Si no hay elementos, devolvemos un arreglo vacío
+        if (context.elementos_matriz() == null)
+        {
+            return new ValorArreglo(elementos, TipoMatriz);
+        }
+        // Visitar cada elemento de la Matriz
+        foreach (var elemento in context.elementos_matriz().elemento_matriz())
+        {
+            if (elemento.contenido_matriz() != null)
+            {
+                // Es una SubMatriz, visitar recursivamente
+                elementos.Add(VisitContenidoMatriz(elemento.contenido_matriz(), TipoMatriz));
+            }
+            else if (elemento.lista_valores() != null)
+            {
+                // Es una lista de valores, procesarla
+                elementos.Add(ProcesarListaValores(elemento.lista_valores(), TipoMatriz));
+            }
+        }
+        // Crear y devolver el arreglo que representa esta Matriz o SubMatriz
+        return new ValorArreglo(elementos, TipoMatriz);
+    }
+
+    private ValorWrapper ProcesarListaValores(LanguageParser.Lista_valoresContext context, string TipoMatriz)
+    {
+        List<ValorWrapper> valores = new List<ValorWrapper>();
+        
+        // Si no hay expresiones, devolvemos una lista vacía
+        if (context.expresion() == null || !context.expresion().Any())
+        {
+            return new ValorArreglo(valores, TipoMatriz);
+        }
+        // Visitar cada expresión y agregarla a la lista
+        foreach (var expresion in context.expresion())
+        {
+            ValorWrapper valor = Visit(expresion);
+            if (!TipoMatriz.Equals(ObtenerTipo(valor), StringComparison.Ordinal))
+                throw new Exception($"Error de tipo: Se esperaba {TipoMatriz} pero se encontró {ObtenerTipo(valor)}");
+            valores.Add(valor);
+        }
+        return new ValorArreglo(valores, TipoMatriz);
+    }
+
+    // VisitAsignacionMatriz
+    public override ValorWrapper VisitAsignacionMatriz(LanguageParser.AsignacionMatrizContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper MatrizActual = EntornoActual.GetVariable(identificador);
+        ValorWrapper ValorNuevo = Visit(context.valornuevo);
+        return ValorVoid;
+    }
+
 
 }

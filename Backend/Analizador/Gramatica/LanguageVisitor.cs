@@ -80,6 +80,43 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitDeclaracionArregloPorDefecto([NotNull] LanguageParser.DeclaracionArregloPorDefectoContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>DeclaracionMatrizExplicita</c>
+	/// labeled alternative in <see cref="LanguageParser.declaracion_matriz"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDeclaracionMatrizExplicita([NotNull] LanguageParser.DeclaracionMatrizExplicitaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.dimensiones"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDimensiones([NotNull] LanguageParser.DimensionesContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.contenido_matriz"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitContenido_matriz([NotNull] LanguageParser.Contenido_matrizContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.elementos_matriz"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitElementos_matriz([NotNull] LanguageParser.Elementos_matrizContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.elemento_matriz"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitElemento_matriz([NotNull] LanguageParser.Elemento_matrizContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.lista_valores"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLista_valores([NotNull] LanguageParser.Lista_valoresContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>ExpresionSentencia</c>
 	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
 	/// </summary>
@@ -181,6 +218,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitAsignacionVariable([NotNull] LanguageParser.AsignacionVariableContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>AsignacionMatriz</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAsignacionMatriz([NotNull] LanguageParser.AsignacionMatrizContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>Booleano</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
