@@ -8,7 +8,7 @@ function App() {
   const [Salida, setSalida] = useState('');
 
   const handleExecute = () => {
-    fetch("http://localhost:5077/Controlador", {
+    fetch("http://localhost:5077/Controlador/Compilar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code: Entrada }),
