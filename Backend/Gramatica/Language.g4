@@ -95,6 +95,7 @@ expresion:
 	| IDENTIFICADOR ('[' expresion ']')+                                            # AccesoMatriz
 	| IDENTIFICADOR '[' expresion ']'                    							# AccesoArreglo
 	| IDENTIFICADOR ('.' IDENTIFICADOR)+                   							# AccesoStruct
+	| IDENTIFICADOR ('.' IDENTIFICADOR)+ '=' expresion								# AsignacionAtributoInstancia
 	| IDENTIFICADOR '[' indice=expresion ']' '=' valornuevo=expresion       		# AsignacionArreglo
 	| IDENTIFICADOR ('[' expresion ']')+ '=' valornuevo=expresion  					# AsignacionMatriz
 	| IDENTIFICADOR '=' expresion                        							# AsignacionVariable

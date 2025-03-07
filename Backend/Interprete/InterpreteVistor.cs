@@ -196,7 +196,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             Salida += "\n";
             return ValorVoid;
         }
-        
+
         List<string> ValoresSalida = new List<string>();
 
         foreach (var expre in context.expresion())
@@ -1017,6 +1017,33 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
 
         throw new Exception($"Error: Tipo '{tipo}' desconocido.");
+    }
+
+    //VisitAccesoStruct
+    public override ValorWrapper VisitAccesoStruct(LanguageParser.AccesoStructContext context)
+    {
+        string NombreStruct = context.IDENTIFICADOR(0).GetText();
+        
+        // Obtener el valor del struct desde el entorno
+        ValorWrapper valorActual = EntornoActual.Obtener(NombreStruct);
+        
+        // Recorrer los identificadores encadenados
+        for (int i = 1; i < context.IDENTIFICADOR().Length; i++)
+        {
+            string atributo = context.IDENTIFICADOR(i).GetText();
+
+            if (valorActual is ValorStruct structValor)
+            {
+                // Obtener el atributo dentro del struct
+                valorActual = structValor.ObtenerAtributo(atributo);
+            }
+            else
+            {
+                throw new Exception($"Error: '{NombreStruct}' no es una estructura válida para acceder a '{atributo}'.");
+            }
+        }
+        Console.WriteLine(valorActual);
+        return valorActual;
     }
 
 
