@@ -335,6 +335,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitFuncionEmbebidaStringsJoin([NotNull] LanguageParser.FuncionEmbebidaStringsJoinContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>AccesoStruct</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAccesoStruct([NotNull] LanguageParser.AccesoStructContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>LogicoOr</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>

@@ -56,7 +56,7 @@ tipo_struct: TIPO
 	;
 
 sentencia: expresion (';')? 																				# ExpresionSentencia
-	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  												# FuncionEmbebidaPrintln
+	| 'fmt.Println(' (expresion (',' expresion)*)? ')' (';')?   											# FuncionEmbebidaPrintln
 	| '{' declaraciones* '}' 																				# Bloque
 	| 'if' ('(' condicion=expresion ')' | condicion=expresion) sentencia ('else' sentencia)? 				# SentenciaIf
 	| 'switch' ('(' condicion=expresion ')' | condicion=expresion) '{' casos_switch* (default_switch)? '}' 	# SentenciaSwitch
@@ -94,6 +94,7 @@ expresion:
 	| izquierda=expresion operador='||' derecha=expresion                           # LogicoOr
 	| IDENTIFICADOR ('[' expresion ']')+                                            # AccesoMatriz
 	| IDENTIFICADOR '[' expresion ']'                    							# AccesoArreglo
+	| IDENTIFICADOR ('.' IDENTIFICADOR)+                   							# AccesoStruct
 	| IDENTIFICADOR '[' indice=expresion ']' '=' valornuevo=expresion       		# AsignacionArreglo
 	| IDENTIFICADOR ('[' expresion ']')+ '=' valornuevo=expresion  					# AsignacionMatriz
 	| IDENTIFICADOR '=' expresion                        							# AsignacionVariable

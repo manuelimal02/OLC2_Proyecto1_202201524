@@ -190,45 +190,52 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     }
     // VisitFuncionEmbebidaPrintln
     public override ValorWrapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)
-{
-    List<string> ValoresSalida = new List<string>();
-
-    foreach (var expre in context.expresion())
     {
-        ValorWrapper expresion = Visit(expre);
-        ValoresSalida.Add(ObtenerRepresentacion(expresion));
+        if (context.expresion() == null)
+        {
+            Salida += "\n";
+            return ValorVoid;
+        }
+        
+        List<string> ValoresSalida = new List<string>();
+
+        foreach (var expre in context.expresion())
+        {
+            ValorWrapper expresion = Visit(expre);
+            ValoresSalida.Add(ObtenerRepresentacion(expresion));
+        }
+
+        Salida += string.Join(" ", ValoresSalida) + "\n";
+        return ValorVoid;
     }
 
-    Salida += string.Join(" ", ValoresSalida) + "\n";
-    return ValorVoid;
-}
-
-private string ObtenerRepresentacion(ValorWrapper valor)
-{
-    if (valor is ValorSlice Arreglo)
+    private string ObtenerRepresentacion(ValorWrapper valor)
     {
-        return "[" + string.Join(", ", Arreglo.Valores.Select(ObtenerRepresentacion)) + "]";
-    }
-    if (valor is ValorStruct Struct)
-    {
-        return ObtenerRepresentacionStruct(Struct);
-    }
-    return ObtenerValor(valor);
-}
-
-private string ObtenerRepresentacionStruct(ValorStruct StructValorAuxiliar)
-{
-    List<string> atributos = new List<string>();
-
-    foreach (var NombreAtributo in StructValorAuxiliar.Atributos)
-    {
-        string nombre = NombreAtributo.Key;
-        string valor = ObtenerRepresentacion(NombreAtributo.Value);
-        atributos.Add($"{nombre}: {valor}");
+        if (valor is ValorSlice Arreglo)
+        {
+            return "[" + string.Join(", ", Arreglo.Valores.Select(ObtenerRepresentacion)) + "]";
+        }
+        if (valor is ValorStruct Struct)
+        {
+            return ObtenerRepresentacionStruct(Struct);
+        }
+        return ObtenerValor(valor);
     }
 
-    return $"{StructValorAuxiliar.NombreStruct}{{" + string.Join(", ", atributos) + "}}";
-}
+    private string ObtenerRepresentacionStruct(ValorStruct StructValorAuxiliar)
+    {
+        List<string> atributos = new List<string>();
+
+        foreach (var NombreAtributo in StructValorAuxiliar.Atributos)
+        {
+            string nombre = NombreAtributo.Key;
+            string valor = ObtenerRepresentacion(NombreAtributo.Value);
+            atributos.Add($"{nombre}: {valor}");
+        }
+
+        return $"{StructValorAuxiliar.NombreStruct}{{ {string.Join(", ", atributos)} }}";
+    }
+
 
     // VisitFuncionEmbebidaAtoi
     public override ValorWrapper VisitFuncionEmbebidaAtoi(LanguageParser.FuncionEmbebidaAtoiContext context)
