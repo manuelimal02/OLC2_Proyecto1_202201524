@@ -117,6 +117,19 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitLista_valores([NotNull] LanguageParser.Lista_valoresContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>DeclaracionFuncion</c>
+	/// labeled alternative in <see cref="LanguageParser.declaracion_funciones"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDeclaracionFuncion([NotNull] LanguageParser.DeclaracionFuncionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.parametros"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitParametros([NotNull] LanguageParser.ParametrosContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>ExpresionSentencia</c>
 	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
 	/// </summary>
@@ -317,6 +330,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitRelacional([NotNull] LanguageParser.RelacionalContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>LlamadaFuncion</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLlamadaFuncion([NotNull] LanguageParser.LlamadaFuncionContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>FuncionEmbebidaAtoi</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
@@ -414,5 +434,17 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitIdentificador([NotNull] LanguageParser.IdentificadorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.llamada"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLlamada([NotNull] LanguageParser.LlamadaContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.argumento"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitArgumento([NotNull] LanguageParser.ArgumentoContext context);
 }
 } // namespace Analizador

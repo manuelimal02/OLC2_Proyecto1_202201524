@@ -12,4 +12,6 @@ public record ValorRune(char Valor) : ValorWrapper;
 
 public record ValorArreglo(List<ValorWrapper> Valores, string Tipo) : ValorWrapper;
 
+public record ValorFuncion(Invocable Invocable, string identificador) : ValorWrapper;
+
 public record ValorVoid : ValorWrapper;

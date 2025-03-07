@@ -11,20 +11,20 @@ public class Entorno
     }
 
 
-    public ValorWrapper GetVariable(string identificador)
+    public ValorWrapper Obtener(string identificador)
     {
         if (Variable.ContainsKey(identificador)){
             return Variable[identificador];
         }
 
         if (EntornoPadre != null){
-            return EntornoPadre.GetVariable(identificador);
+            return EntornoPadre.Obtener(identificador);
         }
         throw new Exception("Variable: " + identificador + " No Encontrada");
       
     }
 
-    public void DeclaracionVariable(string identificador, ValorWrapper valor)
+    public void Declarar(string identificador, ValorWrapper valor)
     {
         if (Variable.ContainsKey(identificador)){
             throw new Exception("Variable: " + identificador + " Ya Existe");
@@ -33,14 +33,14 @@ public class Entorno
         }
     }
 
-    public ValorWrapper AsignacionVariable (string identificador, ValorWrapper valor)
+    public ValorWrapper Asignar (string identificador, ValorWrapper valor)
     {
         if (Variable.ContainsKey(identificador)){
             Variable[identificador] = valor;
             return valor;
         } 
         if (EntornoPadre != null){
-            return EntornoPadre.AsignacionVariable(identificador, valor);
+            return EntornoPadre.Asignar(identificador, valor);
         }
         throw new Exception("Variable: " + identificador + " No Encontrada");
     }

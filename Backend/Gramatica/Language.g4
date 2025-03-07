@@ -2,7 +2,8 @@ grammar Language;
 
 program: declaraciones*;
 
-declaraciones:declaracion_matriz
+declaraciones: declaracion_funciones
+	| declaracion_matriz
 	| declaracion_arreglo 
 	| declaracion_variable
 	| sentencia
@@ -37,6 +38,12 @@ lista_valores
     : '{' (expresion (',' expresion)* ','?)? '}'
     ;
 
+declaracion_funciones: 'func' IDENTIFICADOR '(' parametros? ')' TIPO? '{' declaraciones* '}' 				# DeclaracionFuncion
+	;
+
+parametros: IDENTIFICADOR ('[' ']')? TIPO (',' IDENTIFICADOR ('[' ']')? TIPO)*
+	;
+
 sentencia: expresion (';')? 																				# ExpresionSentencia
 	| 'fmt.Println(' expresion (',' expresion)* ')' (';')?  												# FuncionEmbebidaPrintln
 	| '{' declaraciones* '}' 																				# Bloque
@@ -66,6 +73,7 @@ expresion:
 	| 'strings.Join(' IDENTIFICADOR ',' expresion ')' (';')?   						# FuncionEmbebidaStringsJoin
 	| 'len(' IDENTIFICADOR ')' (';')?                      							# FuncionEmbebidaLen
 	| operador='-' izquierda=expresion                                         		# NegacionUnaria
+	| expresion llamada+ (';')?                                                     # LlamadaFuncion
 	| operador='!' izquierda=expresion                                       		# NegacionLogica
 	| izquierda=expresion operador=('*' | '/' | '%') derecha=expresion              # MultiplicacionDivisionModulo
 	| izquierda=expresion operador=('+' | '-') derecha=expresion                    # SumaResta
@@ -88,6 +96,10 @@ expresion:
 	| IDENTIFICADOR                                      							# Identificador
 	| '(' expresion ')'                                  							# Parentesis
 	;
+
+llamada: '(' argumento? ')';
+
+argumento: expresion (',' expresion)*;
 
 TIPO: 'int' 	
 	| 'float64' 
