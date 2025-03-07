@@ -22,8 +22,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ValorString v => v.Valor,
             ValorBoolean v => v.Valor.ToString(),
             ValorRune v => v.Valor.ToString(),
-            ValorVoid v => "void",
-            _ => throw new ArgumentException("Tipo de valor no soportado")
+            _ => throw new ArgumentException("Obtener Valor: Tipo de valor no soportado")
         };
     }
 
@@ -37,10 +36,19 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ValorBoolean _ => "bool",
             ValorRune _ => "rune",
             ValorVoid _ => "void",
-            ValorArreglo _ => "slice",
-            _ => throw new ArgumentException("Tipo de valor no soportado")
+            ValorSlice Slice => Slice.Tipo,
+            ValorFuncion _ => "funcion",
+            ValorStruct Struct => Struct.NombreStruct, 
+            _ => throw new ArgumentException("Obtener Tipo: Tipo de valor no soportado")
         };
     }
+
+    private bool EsTipoPrimitivo(string tipo)
+    {
+        return tipo == "int" || tipo == "float64" || tipo == "string" || tipo == "bool" || tipo == "rune";
+    }
+
+
     // VisitProgram
     public override ValorWrapper VisitProgram(LanguageParser.ProgramContext context)
     {
@@ -182,27 +190,46 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     }
     // VisitFuncionEmbebidaPrintln
     public override ValorWrapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)
+{
+    List<string> ValoresSalida = new List<string>();
+
+    foreach (var expre in context.expresion())
     {
-        List<string> ValoresSalida = new List<string>();
-
-        foreach (var expre in context.expresion())
-        {
-            ValorWrapper expresion = Visit(expre);
-            ValoresSalida.Add(ObtenerRepresentacion(expresion));
-        }
-
-        Salida += string.Join(" ", ValoresSalida) + "\n";
-        return ValorVoid;
+        ValorWrapper expresion = Visit(expre);
+        ValoresSalida.Add(ObtenerRepresentacion(expresion));
     }
 
-    private string ObtenerRepresentacion(ValorWrapper valor)
+    Salida += string.Join(" ", ValoresSalida) + "\n";
+    return ValorVoid;
+}
+
+private string ObtenerRepresentacion(ValorWrapper valor)
+{
+    if (valor is ValorSlice Arreglo)
     {
-        if (valor is ValorArreglo Arreglo)
-        {
-            return "[" + string.Join(", ", Arreglo.Valores.Select(ObtenerRepresentacion)) + "]";
-        }
-        return ObtenerValor(valor);
+        return "[" + string.Join(", ", Arreglo.Valores.Select(ObtenerRepresentacion)) + "]";
     }
+    if (valor is ValorStruct Struct)
+    {
+        return ObtenerRepresentacionStruct(Struct);
+    }
+    return ObtenerValor(valor);
+}
+
+private string ObtenerRepresentacionStruct(ValorStruct StructValorAuxiliar)
+{
+    List<string> atributos = new List<string>();
+
+    foreach (var NombreAtributo in StructValorAuxiliar.Atributos)
+    {
+        string nombre = NombreAtributo.Key;
+        string valor = ObtenerRepresentacion(NombreAtributo.Value);
+        atributos.Add($"{nombre}: {valor}");
+    }
+
+    return $"{StructValorAuxiliar.NombreStruct}{{" + string.Join(", ", atributos) + "}}";
+}
+
     // VisitFuncionEmbebidaAtoi
     public override ValorWrapper VisitFuncionEmbebidaAtoi(LanguageParser.FuncionEmbebidaAtoiContext context)
     {
@@ -233,7 +260,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitFuncionEmbebidaReflectTypeOf(LanguageParser.FuncionEmbebidaReflectTypeOfContext context)
     {
         ValorWrapper expresion = Visit(context.expresion());
-        if(expresion is ValorArreglo Arreglo)
+        if(expresion is ValorSlice Arreglo)
         {
             return new ValorString("[]"+Arreglo.Tipo);
         }
@@ -376,7 +403,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             ArregloAuxiliar.Add(ValoresArreglo);
         }
-        ValorWrapper NuevoArreglo = new ValorArreglo(ArregloAuxiliar, TipoArreglo);
+        ValorWrapper NuevoArreglo = new ValorSlice(ArregloAuxiliar, TipoArreglo);
         EntornoActual.Declarar(identificador, NuevoArreglo);
         return ValorVoid;
     }
@@ -388,7 +415,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
         string TipoArreglo = context.TIPO().GetText();
         List<ValorWrapper> ArregloAuxiliar = new List<ValorWrapper>();
-        ValorWrapper NuevoArreglo = new ValorArreglo(ArregloAuxiliar, TipoArreglo);
+        ValorWrapper NuevoArreglo = new ValorSlice(ArregloAuxiliar, TipoArreglo);
         EntornoActual.Declarar(identificador, NuevoArreglo);
         return ValorVoid;
     }
@@ -398,7 +425,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
 
-        if (ArregloActual is ValorArreglo Arreglo)
+        if (ArregloActual is ValorSlice Arreglo)
         {
             ValorWrapper ValorBuscado = Visit(context.expresion());
             if(!(Arreglo.Tipo).Equals(ObtenerTipo(ValorBuscado), StringComparison.Ordinal))
@@ -428,11 +455,11 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         if (!(Separador is ValorString))
             throw new Exception("Función Join: El Separador: " + ObtenerValor(Separador) + " No es un String");
         
-        if (ArregloActual is ValorArreglo Arreglo1)
+        if (ArregloActual is ValorSlice Arreglo1)
             if (Arreglo1.Tipo != "string")
             throw new Exception("Función Join: Tipo de Dato Arreglo: " + Arreglo1.Tipo + " No es un String");
         
-        if (ArregloActual is ValorArreglo Arreglo2)
+        if (ArregloActual is ValorSlice Arreglo2)
         {
             List<string> ValoresArreglo = Arreglo2.Valores.Select(valor => ObtenerValor(valor)).ToList();
             return new ValorString(string.Join(ObtenerValor(Separador), ValoresArreglo));
@@ -445,7 +472,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
 
-        if (ArregloActual is ValorArreglo Arreglo)
+        if (ArregloActual is ValorSlice Arreglo)
         {
             return new ValorInt(Arreglo.Valores.Count);
         }
@@ -458,7 +485,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
         ValorWrapper ValorNuevo = Visit(context.expresion());
 
-        if (ArregloActual is ValorArreglo Arreglo)
+        if (ArregloActual is ValorSlice Arreglo)
         {
             if (!Arreglo.Tipo.Equals(ObtenerTipo(ValorNuevo), StringComparison.Ordinal))
             {
@@ -476,7 +503,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
         ValorWrapper Indice = Visit(context.expresion());
 
-        if (ArregloActual is not ValorArreglo Arreglo)
+        if (ArregloActual is not ValorSlice Arreglo)
             throw new Exception("Acceso Arreglo: La Variable: " + identificador + " No es un Arreglo");
         
         if (Indice is not ValorInt IndiceInt)
@@ -495,7 +522,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper Indice = Visit(context.indice);
         ValorWrapper ValorNuevo = Visit(context.valornuevo);
 
-        if (ArregloActual is not ValorArreglo Arreglo)
+        if (ArregloActual is not ValorSlice Arreglo)
             throw new Exception("Asignación Arreglo: La Variable: " + identificador + " No es un Arreglo");
         
         if (Indice is not ValorInt IndiceInt)
@@ -669,15 +696,15 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
         ValorWrapper Arreglo = EntornoActual.Obtener(Slice);
 
-        if (Arreglo is not ValorArreglo Arreglo1)
+        if (Arreglo is not ValorSlice Arreglo1)
             throw new Exception("Sentencia For Range: La Variable: " + Slice + " No es un Arreglo");
 
         for (int i = 0; i < Arreglo1.Valores.Count; i++)
         {
-            // Crear un nuevo entorno para cada iteración
+            // Crear un nuevo EntornoActual para cada iteración
             Entorno EntornoPrevio = EntornoActual;
             EntornoActual = new Entorno(EntornoPrevio);
-            // Asignar índice y valor dentro del nuevo entorno
+            // Asignar índice y valor dentro del nuevo EntornoActual
             EntornoActual.Declarar(Indice, new ValorInt(i));
             EntornoActual.Declarar(Valor, Arreglo1.Valores[i]);
             // Ejecutar la sentencia dentro del for
@@ -705,7 +732,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         // Si no hay elementos, devolvemos un arreglo vacío
         if (context.elementos_matriz() == null)
         {
-            return new ValorArreglo(elementos, TipoMatriz);
+            return new ValorSlice(elementos, TipoMatriz);
         }
         // Visitar cada elemento de la Matriz
         foreach (var elemento in context.elementos_matriz().elemento_matriz())
@@ -722,7 +749,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
         }
         // Crear y devolver el arreglo que representa esta Matriz o SubMatriz
-        return new ValorArreglo(elementos, TipoMatriz);
+        return new ValorSlice(elementos, TipoMatriz);
     }
 
     private ValorWrapper ProcesarListaValores(LanguageParser.Lista_valoresContext context, string TipoMatriz)
@@ -732,7 +759,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         // Si no hay expresiones, devolvemos una lista vacía
         if (context.expresion() == null || !context.expresion().Any())
         {
-            return new ValorArreglo(valores, TipoMatriz);
+            return new ValorSlice(valores, TipoMatriz);
         }
         // Visitar cada expresión y agregarla a la lista
         foreach (var expresion in context.expresion())
@@ -742,7 +769,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
                 throw new Exception($"Error de tipo: Se esperaba {TipoMatriz} pero se encontró {ObtenerTipo(valor)}");
             valores.Add(valor);
         }
-        return new ValorArreglo(valores, TipoMatriz);
+        return new ValorSlice(valores, TipoMatriz);
     }
 
     // VisitAsignacionMatriz
@@ -752,7 +779,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper MatrizActual = EntornoActual.Obtener(identificador);
         ValorWrapper NuevoValor = Visit(context.valornuevo);
         
-        if (MatrizActual is not ValorArreglo Matriz)
+        if (MatrizActual is not ValorSlice Matriz)
             throw new Exception("Asignación Matriz: La Variable "+ identificador + "no es una Matriz");
         
         if (!Matriz.Tipo.Equals(ObtenerTipo(NuevoValor), StringComparison.Ordinal))
@@ -772,7 +799,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             IndicesMatriz.RemoveAt(IndicesMatriz.Count - 1);
         }
         // Navegar por los niveles de la matriz hasta el penúltimo índice
-        ValorArreglo SubMatrixAuxiliar = Matriz;
+        ValorSlice SubMatrixAuxiliar = Matriz;
         for (int i = 0; i < IndicesMatriz.Count - 1; i++)
         {
             int indice = IndicesMatriz[i];
@@ -780,7 +807,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             if (indice < 0 || indice >= SubMatrixAuxiliar.Valores.Count)
                 throw new Exception($"Error Asignación: Índice fuera de rango: {indice}. Tamaño de la matriz: {SubMatrixAuxiliar.Valores.Count}");
             // Avanzar en la matriz
-            if (SubMatrixAuxiliar.Valores[indice] is ValorArreglo siguienteNivel)
+            if (SubMatrixAuxiliar.Valores[indice] is ValorSlice siguienteNivel)
             {
                 SubMatrixAuxiliar = siguienteNivel;
             }
@@ -804,7 +831,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper MatrizActual = EntornoActual.Obtener(identificador);
 
-        if (MatrizActual is not ValorArreglo Matriz)
+        if (MatrizActual is not ValorSlice Matriz)
             throw new Exception("Acceso Matriz: La Variable '" + identificador + "' no es una Matriz.");
         
         // Obtener los índices
@@ -818,7 +845,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
 
         // Navegar por los niveles de la matriz
-        ValorArreglo SubMatriz = Matriz;
+        ValorSlice SubMatriz = Matriz;
         for (int i = 0; i < IndicesMatriz.Count; i++)
         {
             int indice = IndicesMatriz[i];
@@ -832,7 +859,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
                 return SubMatriz.Valores[indice];
 
             // Verificar que el siguiente nivel sigue siendo una matriz
-            if (SubMatriz.Valores[indice] is not ValorArreglo nuevaSubMatriz)
+            if (SubMatriz.Valores[indice] is not ValorSlice nuevaSubMatriz)
                 throw new Exception($"Error Acceso: Intento de acceso en un nivel inválido. La posición [{string.Join(", ", IndicesMatriz)}] no contiene una matriz.");
             
             SubMatriz = nuevaSubMatriz;
@@ -891,39 +918,99 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string NombreStruct = context.IDENTIFICADOR().GetText();
         Dictionary<string, string> AtributoStruct = new();
 
-        foreach (var atributo in context.atributos())
+        foreach (var Atributo in context.atributos())
         {
-            for (int i = 0; i < atributo.tipo_struct().Length; i++)
+            for (int i = 0; i < Atributo.tipo_struct().Length; i++)
             {
-                string tipo_atributo = atributo.tipo_struct(i).GetText();
-                string nombre_atributo = atributo.IDENTIFICADOR(i).GetText();
+                string TipoAtributo = Atributo.tipo_struct(i).GetText();
+                string NombreAtributo = Atributo.IDENTIFICADOR(i).GetText();
 
-                if (!EsTipoPrimitivo(tipo_atributo) && !EntornoActual.ExisteStruct(tipo_atributo))
+                if (!EsTipoPrimitivo(TipoAtributo) && !EntornoActual.ExisteStruct(TipoAtributo))
                 {
-                    throw new Exception($"Error: Se intenta usar el struct '{tipo_atributo}', pero no está definido.");
+                    throw new Exception($"Error: Se intenta usar el struct '{TipoAtributo}', pero no está definido.");
                 }
 
-                if (AtributoStruct.ContainsKey(nombre_atributo))
+                if (AtributoStruct.ContainsKey(NombreAtributo))
                 {
-                    throw new Exception($"Error: El atributo '{nombre_atributo}' ya está definido en el struct '{NombreStruct}'.");
+                    throw new Exception($"Error: El NombreAtributo '{NombreAtributo}' ya está definido en el struct '{NombreStruct}'.");
                 }
 
-                AtributoStruct.Add(nombre_atributo, tipo_atributo);
+                AtributoStruct.Add(NombreAtributo, TipoAtributo);
             }
         }
-        Salida+= "Declaración de Struct: " + NombreStruct + " con los atributos: " + string.Join(", ", AtributoStruct.Select(x => x.Key + " " + x.Value)) + "\n";
+
         EntornoActual.DeclararStruct(NombreStruct, AtributoStruct);
         return ValorVoid;
     }
 
-
-
-    private bool EsTipoPrimitivo(string tipo)
+    // VisitAsignacionInstancia
+    public override ValorWrapper VisitAsignacionInstancia(LanguageParser.AsignacionInstanciaContext context)
     {
-        return tipo == "int" || tipo == "float64" || tipo == "string" || tipo == "bool" || tipo == "rune";
+        string NombreStruct = context.IDENTIFICADOR().GetText();
+
+        if (!EntornoActual.ExisteStruct(NombreStruct))
+        {
+            throw new Exception($"Error: El struct '{NombreStruct}' no está definido.");
+        }
+        Dictionary<string, string> AtributosStruct = EntornoActual.ObtenerStruct(NombreStruct);
+        Dictionary<string, ValorWrapper> AtributosNuevaInstancia = new();
+
+        for (int i = 0; i < context.atributos_instancia().IDENTIFICADOR().Length; i++)
+        {
+            string NombreAtributo = context.atributos_instancia().IDENTIFICADOR(i).GetText();
+            ValorWrapper ValorAtributo = Visit(context.atributos_instancia().expresion(i)); 
+
+            if (!AtributosStruct.ContainsKey(NombreAtributo))
+            {
+                throw new Exception($"Error: El NombreAtributo '{NombreAtributo}' no existe en el struct '{NombreStruct}'.");
+            }
+
+            string TipoAtributoEsperado = AtributosStruct[NombreAtributo];
+
+            if (!ObtenerTipo(ValorAtributo).Equals(TipoAtributoEsperado))
+            {
+                throw new Exception($"Error: El Atributo '{NombreAtributo}' de '{NombreStruct}' esperaba un Atributo de tipo '{TipoAtributoEsperado}', pero se recibió '{ObtenerTipo(ValorAtributo)}'.");
+            }
+
+            AtributosNuevaInstancia[NombreAtributo] = ValorAtributo;
+        }
+
+        foreach (var NombreAtributo in AtributosStruct)
+        {
+            if (!AtributosNuevaInstancia.ContainsKey(NombreAtributo.Key))
+            {
+                string tipo = NombreAtributo.Value;
+                AtributosNuevaInstancia[NombreAtributo.Key] = ObtenerValorPorDefecto(tipo);
+            }
+        }
+
+        ValorStruct NuevaInstancia = new(AtributosNuevaInstancia, NombreStruct);
+        return NuevaInstancia;
+    }
+
+    private ValorWrapper ObtenerValorPorDefecto(string tipo)
+    {
+        if (tipo == "int") return new ValorInt(0);
+        if (tipo == "float64") return new ValorFloat64(0);
+        if (tipo == "string") return new ValorString("");
+        if (tipo == "bool") return new ValorBoolean(false);
+        if (tipo == "rune") return new ValorRune(' ');
+        
+        if (EntornoActual.ExisteStruct(tipo))
+        {
+            Dictionary<string, string> atributosDefinidos = EntornoActual.ObtenerStruct(tipo);
+            Dictionary<string, ValorWrapper> atributosInicializados = new();
+
+            foreach (var atributo in atributosDefinidos)
+            {
+                atributosInicializados[atributo.Key] = ObtenerValorPorDefecto(atributo.Value);
+            }
+
+            return new ValorStruct(atributosInicializados, tipo);
+        }
+
+        throw new Exception($"Error: Tipo '{tipo}' desconocido.");
     }
 
 
-
-    
 }

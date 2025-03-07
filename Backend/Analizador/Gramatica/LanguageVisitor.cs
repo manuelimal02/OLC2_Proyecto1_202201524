@@ -149,19 +149,6 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitTipo_struct([NotNull] LanguageParser.Tipo_structContext context);
 	/// <summary>
-	/// Visit a parse tree produced by the <c>InstanciaStruct</c>
-	/// labeled alternative in <see cref="LanguageParser.crear_instancia"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitInstanciaStruct([NotNull] LanguageParser.InstanciaStructContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="LanguageParser.atributos_instancia"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAtributos_instancia([NotNull] LanguageParser.Atributos_instanciaContext context);
-	/// <summary>
 	/// Visit a parse tree produced by the <c>ExpresionSentencia</c>
 	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
 	/// </summary>
@@ -270,6 +257,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitAccesoMatriz([NotNull] LanguageParser.AccesoMatrizContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>AsignacionInstancia</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAsignacionInstancia([NotNull] LanguageParser.AsignacionInstanciaContext context);
 	/// <summary>
 	/// Visit a parse tree produced by the <c>AsignacionMatriz</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
@@ -466,6 +460,12 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitIdentificador([NotNull] LanguageParser.IdentificadorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.atributos_instancia"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAtributos_instancia([NotNull] LanguageParser.Atributos_instanciaContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="LanguageParser.llamada"/>.
 	/// </summary>

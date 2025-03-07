@@ -41,7 +41,7 @@ public class FuncionForanea : Invocable
                     throw new Exception($"Error de declaración: El nombre del parámetro '{NombreParametro}' ya existe.");
                 }
 
-                if(argumentos[i] is ValorArreglo Arreglo)
+                if(argumentos[i] is ValorSlice Arreglo)
                 {
                     if (Arreglo.Tipo.Equals(TipoParametro))
                     {
@@ -76,7 +76,7 @@ public class FuncionForanea : Invocable
                 visitor.EntornoActual = EntornoDespuesDeLlamada;
                 string TipoRetornado = ObtenerTipo(VarRetorno.Valor);
 
-                if (VarRetorno.Valor is ValorArreglo Arreglo){
+                if (VarRetorno.Valor is ValorSlice Arreglo){
                     if (Arreglo.Tipo.Equals(TipoRetornoEsperado))
                     {
                         return VarRetorno.Valor;
@@ -108,7 +108,7 @@ public class FuncionForanea : Invocable
             ValorBoolean _ => "bool",
             ValorRune _ => "rune",
             ValorVoid _ => "void",
-            ValorArreglo _ => "slice",
+            ValorSlice _ => "slice",
             _ => throw new ArgumentException("Tipo de valor no soportado")
         };
     }

@@ -45,7 +45,8 @@ public class Entorno
         }
         throw new Exception("Simbolo: " + identificador + " No Encontrado.");
     }
-    // Métodos para manejar los structs
+
+    //Metodos Para Structs
     public void DeclararStruct(string nombre, Dictionary<string, string> atributos)
     {
         if (Struct.ContainsKey(nombre))
@@ -70,11 +71,11 @@ public class Entorno
     }
 
      public bool ExisteStruct(string nombre)
+    {
+        if (Struct.ContainsKey(nombre))
         {
-            if (Struct.ContainsKey(nombre))
-            {
-                return true;
-            }
-            return EntornoPadre?.ExisteStruct(nombre) ?? false;
+            return true;
         }
+        return EntornoPadre?.ExisteStruct(nombre) ?? false;
+    }
 }
