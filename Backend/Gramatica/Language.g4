@@ -98,7 +98,8 @@ TIPO: 'int'
 
 ENTERO: [0-9]+;
 DECIMAL: [0-9]+ '.' [0-9]+;
-CADENA: '"' ~["]* '"';
+CADENA: '"' (ESCAPE | ~["\\])* '"';
+ESCAPE: '\\' ["\\nrt];
 BOOLEANO: 'true' | 'false';
 CARACTER: '\'' . '\'';
 

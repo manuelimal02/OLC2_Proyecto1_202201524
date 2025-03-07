@@ -76,7 +76,14 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitCadena(LanguageParser.CadenaContext context)
     {
         string cadena = context.CADENA().GetText();
-        return new ValorString(cadena.Substring(1, cadena.Length - 2));
+        cadena = cadena.Substring(1, cadena.Length - 2);
+        cadena = cadena
+            .Replace("\\\"", "\"")
+            .Replace("\\\\", "\\")
+            .Replace("\\n", "\n")
+            .Replace("\\r", "\r")
+            .Replace("\\t", "\t");
+        return new ValorString(cadena);
     }
     // VisitBooleano
     public override ValorWrapper VisitBooleano(LanguageParser.BooleanoContext context)
