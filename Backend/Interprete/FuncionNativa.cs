@@ -6,12 +6,14 @@ public class FuncionForanea : Invocable
     private LanguageParser.DeclaracionFuncionContext context;
 
     private string TipoRetornoEsperado;
+    private string NombreFuncion;
 
     public FuncionForanea(Entorno clousure, LanguageParser.DeclaracionFuncionContext context)
     {
         Clousure = clousure;
         this.context = context;
-         this.TipoRetornoEsperado = context.TIPO()?.GetText() ?? "void"; 
+        this.TipoRetornoEsperado = context.TIPO()?.GetText() ?? "void"; 
+        this.NombreFuncion = context.IDENTIFICADOR().GetText();
     }
     public int Aridad()
     {
@@ -29,12 +31,12 @@ public class FuncionForanea : Invocable
         visitor.EntornoActual = NuevoEntorno;
         if (context.parametros() != null)
         {
-            HashSet<string> nombresParametros = new HashSet<string>();
+            HashSet<string> ParametrosDeclarados = new HashSet<string>();
             for (int i = 0; i < context.parametros().IDENTIFICADOR().Length; i++)
             {
                 string NombreParametro = context.parametros().IDENTIFICADOR(i).GetText();
                 string TipoParametro = context.parametros().TIPO(i).GetText();
-                if (!nombresParametros.Add(NombreParametro))
+                if (!ParametrosDeclarados.Add(NombreParametro))
                 {
                     throw new Exception($"Error de declaración: El nombre del parámetro '{NombreParametro}' ya existe.");
                 }
@@ -81,13 +83,13 @@ public class FuncionForanea : Invocable
                     }
                     else
                     {
-                        throw new Exception($"Error de retorno: Se esperaba '{TipoRetornoEsperado}', pero se retornó '{Arreglo.Tipo}'.");
+                        throw new Exception($"Error de retorno: La función '{NombreFuncion}' esperaba '{TipoRetornoEsperado}', pero se retornó '{Arreglo.Tipo}'.");
                     }
                 }
 
                 if (TipoRetornado != TipoRetornoEsperado)
                 {
-                    throw new Exception($"Error de retorno: Se esperaba '{TipoRetornoEsperado}', pero se retornó '{TipoRetornado}'.");
+                    throw new Exception($"Error de retorno: La función '{NombreFuncion}' esperaba '{TipoRetornoEsperado}', pero se retornó '{TipoRetornado}'.");
                 }
                 return VarRetorno.Valor;
         }
