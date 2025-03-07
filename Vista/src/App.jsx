@@ -24,6 +24,33 @@ function App() {
       });
   };
 
+  const handleDownloadAST = () => {
+    fetch("http://localhost:5077/Controlador/Graficar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: Entrada }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Error al generar el AST");
+        }
+        return response.blob();
+      })
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "AST.png";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      })
+      .catch(error => {
+        console.error("Error en la descarga:", error);
+      });
+  };
+
   return (
     <div className="container">
       <div className="navbar">
@@ -46,7 +73,7 @@ function App() {
             <div className="dropdown-content">
               <button id="TablaErrores">Tabla De Errores</button>
               <button id="TablaSimbolos">Tabla de Símbolos</button>
-              <button id="ReporteAST">Reporte de AST</button>
+              <button id="ReporteAST" onClick={handleDownloadAST}>Reporte de AST</button>
             </div>
           </div>
 
