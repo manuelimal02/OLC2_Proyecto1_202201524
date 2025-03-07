@@ -130,6 +130,38 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitParametros([NotNull] LanguageParser.ParametrosContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>DeclaracionStruct</c>
+	/// labeled alternative in <see cref="LanguageParser.declaracion_struct"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDeclaracionStruct([NotNull] LanguageParser.DeclaracionStructContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.atributos"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAtributos([NotNull] LanguageParser.AtributosContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.tipo_struct"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitTipo_struct([NotNull] LanguageParser.Tipo_structContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>InstanciaStruct</c>
+	/// labeled alternative in <see cref="LanguageParser.crear_instancia"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitInstanciaStruct([NotNull] LanguageParser.InstanciaStructContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.atributos_instancia"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAtributos_instancia([NotNull] LanguageParser.Atributos_instanciaContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>ExpresionSentencia</c>
 	/// labeled alternative in <see cref="LanguageParser.sentencia"/>.
 	/// </summary>

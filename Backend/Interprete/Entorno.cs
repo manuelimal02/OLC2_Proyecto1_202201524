@@ -1,7 +1,8 @@
 public class Entorno
 {
 
-    public Dictionary<string, ValorWrapper> Variable = new Dictionary<string, ValorWrapper>();
+    public Dictionary<string, ValorWrapper> Simbolo = new Dictionary<string, ValorWrapper>();
+    public Dictionary<string, Dictionary<string, string>> Struct = new();
 
     private Entorno? EntornoPadre;
 
@@ -13,35 +14,67 @@ public class Entorno
 
     public ValorWrapper Obtener(string identificador)
     {
-        if (Variable.ContainsKey(identificador)){
-            return Variable[identificador];
+        if (Simbolo.ContainsKey(identificador)){
+            return Simbolo[identificador];
         }
 
         if (EntornoPadre != null){
             return EntornoPadre.Obtener(identificador);
         }
-        throw new Exception("Variable: " + identificador + " No Encontrada");
+        throw new Exception("Simbolo: " + identificador + " No Encontrado");
       
     }
 
     public void Declarar(string identificador, ValorWrapper valor)
     {
-        if (Variable.ContainsKey(identificador)){
-            throw new Exception("Variable: " + identificador + " Ya Existe");
+        if (Simbolo.ContainsKey(identificador)){
+            throw new Exception("Simbolo: " + identificador + " Ya Existe");
         } else {
-            Variable.Add(identificador, valor);
+            Simbolo.Add(identificador, valor);
         }
     }
 
     public ValorWrapper Asignar (string identificador, ValorWrapper valor)
     {
-        if (Variable.ContainsKey(identificador)){
-            Variable[identificador] = valor;
+        if (Simbolo.ContainsKey(identificador)){
+            Simbolo[identificador] = valor;
             return valor;
         } 
         if (EntornoPadre != null){
             return EntornoPadre.Asignar(identificador, valor);
         }
-        throw new Exception("Variable: " + identificador + " No Encontrada");
+        throw new Exception("Simbolo: " + identificador + " No Encontrado.");
     }
+    // Métodos para manejar los structs
+    public void DeclararStruct(string nombre, Dictionary<string, string> atributos)
+    {
+        if (Struct.ContainsKey(nombre))
+        {
+            throw new Exception($"Error: El struct '{nombre}' ya está definido.");
+        }
+        Struct[nombre] = atributos;
+    }
+
+
+    public Dictionary<string, string> ObtenerStruct(string nombre)
+    {
+        if (Struct.ContainsKey(nombre))
+        {
+            return Struct[nombre];
+        }
+        if (EntornoPadre != null)
+        {
+            return EntornoPadre.ObtenerStruct(nombre);
+        }
+        throw new Exception($"Error: El struct '{nombre}' no está definido.");
+    }
+
+     public bool ExisteStruct(string nombre)
+        {
+            if (Struct.ContainsKey(nombre))
+            {
+                return true;
+            }
+            return EntornoPadre?.ExisteStruct(nombre) ?? false;
+        }
 }

@@ -6,6 +6,8 @@ declaraciones: declaracion_funciones
 	| declaracion_matriz
 	| declaracion_arreglo 
 	| declaracion_variable
+	| declaracion_struct
+	| crear_instancia
 	| sentencia
 	;
 
@@ -42,6 +44,22 @@ declaracion_funciones: 'func' IDENTIFICADOR '(' parametros? ')' TIPO? '{' declar
 	;
 
 parametros: IDENTIFICADOR ('[' ']')? TIPO (',' IDENTIFICADOR ('[' ']')? TIPO)*
+	;
+
+declaracion_struct: 'struct' IDENTIFICADOR '{' atributos* '}'											# DeclaracionStruct
+	;
+
+atributos: tipo_struct IDENTIFICADOR (';')? (tipo_struct IDENTIFICADOR (';')? )*													
+	;
+
+tipo_struct: TIPO
+	| IDENTIFICADOR
+	;
+
+crear_instancia: IDENTIFICADOR ':=' IDENTIFICADOR '{' atributos_instancia '}' (';')? 						# InstanciaStruct
+	;
+
+atributos_instancia: IDENTIFICADOR ':' expresion (',' IDENTIFICADOR ':' expresion)* (';')? 				
 	;
 
 sentencia: expresion (';')? 																				# ExpresionSentencia

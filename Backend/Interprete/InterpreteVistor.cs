@@ -884,4 +884,46 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         EntornoActual.Declarar(identificador, new ValorFuncion(FuncionForranea, identificador));
         return ValorVoid;
     }
+
+    // VisitDeclaracionStruct
+    public override ValorWrapper VisitDeclaracionStruct(LanguageParser.DeclaracionStructContext context)
+    {
+        string NombreStruct = context.IDENTIFICADOR().GetText();
+        Dictionary<string, string> AtributoStruct = new();
+
+        foreach (var atributo in context.atributos())
+        {
+            for (int i = 0; i < atributo.tipo_struct().Length; i++)
+            {
+                string tipo_atributo = atributo.tipo_struct(i).GetText();
+                string nombre_atributo = atributo.IDENTIFICADOR(i).GetText();
+
+                if (!EsTipoPrimitivo(tipo_atributo) && !EntornoActual.ExisteStruct(tipo_atributo))
+                {
+                    throw new Exception($"Error: Se intenta usar el struct '{tipo_atributo}', pero no está definido.");
+                }
+
+                if (AtributoStruct.ContainsKey(nombre_atributo))
+                {
+                    throw new Exception($"Error: El atributo '{nombre_atributo}' ya está definido en el struct '{NombreStruct}'.");
+                }
+
+                AtributoStruct.Add(nombre_atributo, tipo_atributo);
+            }
+        }
+        Salida+= "Declaración de Struct: " + NombreStruct + " con los atributos: " + string.Join(", ", AtributoStruct.Select(x => x.Key + " " + x.Value)) + "\n";
+        EntornoActual.DeclararStruct(NombreStruct, AtributoStruct);
+        return ValorVoid;
+    }
+
+
+
+    private bool EsTipoPrimitivo(string tipo)
+    {
+        return tipo == "int" || tipo == "float64" || tipo == "string" || tipo == "bool" || tipo == "rune";
+    }
+
+
+
+    
 }
