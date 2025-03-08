@@ -1022,29 +1022,68 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     //VisitAccesoStruct
     public override ValorWrapper VisitAccesoStruct(LanguageParser.AccesoStructContext context)
     {
-        string NombreStruct = context.IDENTIFICADOR(0).GetText();
+        string NombreInstancia = context.IDENTIFICADOR(0).GetText();
         
-        // Obtener el valor del struct desde el entorno
-        ValorWrapper valorActual = EntornoActual.Obtener(NombreStruct);
+        ValorWrapper InstanciaActual = EntornoActual.Obtener(NombreInstancia);
         
-        // Recorrer los identificadores encadenados
         for (int i = 1; i < context.IDENTIFICADOR().Length; i++)
         {
             string atributo = context.IDENTIFICADOR(i).GetText();
 
-            if (valorActual is ValorStruct structValor)
+            if (InstanciaActual is ValorStruct StructAuxiliar)
             {
-                // Obtener el atributo dentro del struct
-                valorActual = structValor.ObtenerAtributo(atributo);
+                InstanciaActual = StructAuxiliar.ObtenerAtributo(atributo);
             }
             else
             {
-                throw new Exception($"Error: '{NombreStruct}' no es una estructura válida para acceder a '{atributo}'.");
+                throw new Exception($"Error: '{NombreInstancia}' no es una estructura válida para acceder a '{atributo}'.");
             }
         }
-        Console.WriteLine(valorActual);
-        return valorActual;
+        return InstanciaActual;
     }
 
+    // VisitAsignacionAtributoInstancia
+    public override ValorWrapper VisitAsignacionAtributoInstancia(LanguageParser.AsignacionAtributoInstanciaContext context)
+    {
+        string NombreInstancia = context.IDENTIFICADOR(0).GetText();
+        ValorWrapper InstanciaActual = EntornoActual.Obtener(NombreInstancia);
+        ValorWrapper NuevoValor = Visit(context.expresion());
+
+        // Recorrer los atributos anidados
+        for (int i = 1; i < context.IDENTIFICADOR().Length - 1; i++)
+        {
+            string atributo = context.IDENTIFICADOR(i).GetText();
+
+            if (InstanciaActual is ValorStruct StructAuxiliar)
+            {
+                InstanciaActual = StructAuxiliar.ObtenerAtributo(atributo);
+            }
+            else
+            {
+                throw new Exception($"Error: '{NombreInstancia}' no es una estructura válida para acceder a '{atributo}'.");
+            }
+        }
+
+        string AtributoFinal = context.IDENTIFICADOR().Last().GetText();
+
+        if (InstanciaActual is ValorStruct InstanciaModificable)
+        {
+            ValorWrapper ValorExistente = InstanciaModificable.ObtenerAtributo(AtributoFinal);
+
+            if (!ObtenerTipo(NuevoValor).Equals(ObtenerTipo(ValorExistente), StringComparison.Ordinal))
+            {
+                throw new Exception($"Error: No se puede asignar un valor de tipo '{ObtenerTipo(NuevoValor)}' al atributo '{AtributoFinal}' de tipo '{ObtenerTipo(ValorExistente)}'.");
+            }
+
+            // Asignar nuevo valor
+            InstanciaModificable.AsignarAtributo(AtributoFinal, NuevoValor);
+        }
+        else
+        {
+            throw new Exception($"Error: No se puede asignar a '{AtributoFinal}' porque '{InstanciaActual}' no es un struct.");
+        }
+
+        return NuevoValor;
+    }
 
 }

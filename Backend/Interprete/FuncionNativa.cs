@@ -35,25 +35,11 @@ public class FuncionForanea : Invocable
             for (int i = 0; i < context.parametros().IDENTIFICADOR().Length; i++)
             {
                 string NombreParametro = context.parametros().IDENTIFICADOR(i).GetText();
-                string TipoParametro = context.parametros().TIPO(i).GetText();
+                string TipoParametro = context.parametros().tipo_funcion(i).GetText();
                 if (!ParametrosDeclarados.Add(NombreParametro))
                 {
                     throw new Exception($"Error de declaración: El nombre del parámetro '{NombreParametro}' ya existe.");
                 }
-
-                if(argumentos[i] is ValorSlice Arreglo)
-                {
-                    if (Arreglo.Tipo.Equals(TipoParametro))
-                    {
-                        NuevoEntorno.Declarar(NombreParametro, argumentos[i]);
-                        continue;
-                    }
-                    else
-                    {
-                        throw new Exception($"Se esperaba el tipo '{TipoParametro}' en el parametro '{NombreParametro}' pero se recibió: '{Arreglo.Tipo}'");
-                    }
-                }
-
                 if (!ObtenerTipo(argumentos[i]).Equals(TipoParametro))
                 {
                     throw new Exception($"Se esperaba el tipo '{TipoParametro}' en el parametro '{NombreParametro}' pero se recibió: '{ObtenerTipo(argumentos[i])}'");
@@ -74,22 +60,10 @@ public class FuncionForanea : Invocable
 
         } catch (ExceptionReturn VarRetorno) {
                 visitor.EntornoActual = EntornoDespuesDeLlamada;
-                string TipoRetornado = ObtenerTipo(VarRetorno.Valor);
 
-                if (VarRetorno.Valor is ValorSlice Arreglo){
-                    if (Arreglo.Tipo.Equals(TipoRetornoEsperado))
-                    {
-                        return VarRetorno.Valor;
-                    }
-                    else
-                    {
-                        throw new Exception($"Error de retorno: La función '{NombreFuncion}' esperaba '{TipoRetornoEsperado}', pero se retornó '{Arreglo.Tipo}'.");
-                    }
-                }
-
-                if (TipoRetornado != TipoRetornoEsperado)
+                if (!ObtenerTipo(VarRetorno.Valor).Equals(TipoRetornoEsperado))
                 {
-                    throw new Exception($"Error de retorno: La función '{NombreFuncion}' esperaba '{TipoRetornoEsperado}', pero se retornó '{TipoRetornado}'.");
+                    throw new Exception($"Error de retorno: La función '{NombreFuncion}' esperaba '{TipoRetornoEsperado}', pero se retornó '{ObtenerTipo(VarRetorno.Valor)}'.");
                 }
                 return VarRetorno.Valor;
         }
@@ -107,8 +81,9 @@ public class FuncionForanea : Invocable
             ValorString _ => "string",
             ValorBoolean _ => "bool",
             ValorRune _ => "rune",
+            ValorSlice Arreglo => Arreglo.Tipo,
+            ValorStruct Struct => Struct.NombreStruct,
             ValorVoid _ => "void",
-            ValorSlice _ => "slice",
             _ => throw new ArgumentException("Tipo de valor no soportado")
         };
     }

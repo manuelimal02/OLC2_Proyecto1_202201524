@@ -42,7 +42,11 @@ lista_valores
 declaracion_funciones: 'func' IDENTIFICADOR '(' parametros? ')' TIPO? '{' declaraciones* '}' 				# DeclaracionFuncion
 	;
 
-parametros: IDENTIFICADOR ('[' ']')? TIPO (',' IDENTIFICADOR ('[' ']')? TIPO)*
+parametros: IDENTIFICADOR ('[' ']')? tipo_funcion (',' IDENTIFICADOR ('[' ']')? tipo_funcion)*
+	;
+
+tipo_funcion: TIPO
+	| IDENTIFICADOR
 	;
 
 declaracion_struct: 'struct' IDENTIFICADOR '{' atributos* '}'											# DeclaracionStruct
