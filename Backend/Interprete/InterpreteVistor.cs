@@ -13,6 +13,8 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public string Salida = "";
     public Entorno EntornoActual = new Entorno(null);
     private ValorWrapper ValorVoid = new ValorVoid();
+
+    private ValorFuncion MainFunction = null;
     public string ObtenerValor(ValorWrapper valor)
     {
         return valor switch
@@ -56,6 +58,23 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         {
             Visit(sentencia);
         }
+
+        if (MainFunction != null)
+        {
+            try
+            {
+                MainFunction.Invocable.Invoke(new List<ValorWrapper>(), this);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al ejecutar la función main: " + ex.Message);
+            }
+        }
+        else
+        {
+            throw new Exception("No se encontró la función 'main' en el programa.");
+        }
+
         return ValorVoid;
     }
     //VisitExpresionSentencia
@@ -914,8 +933,15 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitDeclaracionFuncion(LanguageParser.DeclaracionFuncionContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        var FuncionForranea = new FuncionForanea(EntornoActual, context);
-        EntornoActual.Declarar(identificador, new ValorFuncion(FuncionForranea, identificador));
+        var funcionForranea = new FuncionForanea(EntornoActual, context);
+        var valorFuncion = new ValorFuncion(funcionForranea, identificador);
+        EntornoActual.Declarar(identificador, valorFuncion);
+
+        if (identificador == "main")
+        {
+            MainFunction = valorFuncion;
+        }
+
         return ValorVoid;
     }
 
@@ -1084,6 +1110,56 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
 
         return NuevoValor;
+    }
+    // VisitIncremento
+    public override ValorWrapper VisitIncremento(LanguageParser.IncrementoContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper variable = EntornoActual.Obtener(identificador);
+
+        if (variable is ValorInt)
+        {
+            ValorInt valor = (ValorInt)variable;
+            ValorInt nuevoValor = new(valor.Valor + 1);
+            EntornoActual.Asignar(identificador, nuevoValor);
+            return nuevoValor;
+        }
+        else if (variable is ValorFloat64)
+        {
+            ValorFloat64 valor = (ValorFloat64)variable;
+            ValorFloat64 nuevoValor = new(valor.Valor + 1);
+            EntornoActual.Asignar(identificador, nuevoValor);
+            return nuevoValor;
+        }
+        else
+        {
+            throw new Exception("Incremento: Tipo de Dato: " + ObtenerTipo(variable) + " No es un Entero o Float64");
+        }
+    }
+    // VisitDecremento
+    public override ValorWrapper VisitDecremento(LanguageParser.DecrementoContext context)
+    {
+        string identificador = context.IDENTIFICADOR().GetText();
+        ValorWrapper variable = EntornoActual.Obtener(identificador);
+
+        if (variable is ValorInt)
+        {
+            ValorInt valor = (ValorInt)variable;
+            ValorInt nuevoValor = new(valor.Valor - 1);
+            EntornoActual.Asignar(identificador, nuevoValor);
+            return nuevoValor;
+        }
+        else if (variable is ValorFloat64)
+        {
+            ValorFloat64 valor = (ValorFloat64)variable;
+            ValorFloat64 nuevoValor = new(valor.Valor - 1);
+            EntornoActual.Asignar(identificador, nuevoValor);
+            return nuevoValor;
+        }
+        else
+        {
+            throw new Exception("Decremento: Tipo de Dato: " + ObtenerTipo(variable) + " No es un Entero o Float64");
+        }
     }
 
 }

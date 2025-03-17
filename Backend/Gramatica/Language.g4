@@ -49,7 +49,7 @@ tipo_funcion: TIPO
 	| IDENTIFICADOR
 	;
 
-declaracion_struct: 'struct' IDENTIFICADOR '{' atributos* '}'											# DeclaracionStruct
+declaracion_struct: 'type' IDENTIFICADOR 'struct' '{' atributos* '}'											# DeclaracionStruct
 	;
 
 atributos: tipo_struct IDENTIFICADOR (';')? (tipo_struct IDENTIFICADOR (';')? )*													
@@ -86,7 +86,7 @@ expresion:
 	| 'reflect.TypeOf(' expresion ')' (';')?                						# FuncionEmbebidaReflectTypeOf
 	| 'slices.Index(' IDENTIFICADOR ',' expresion ')' (';')?                 		# FuncionEmbebidaSlicesIndex
 	| 'strings.Join(' IDENTIFICADOR ',' expresion ')' (';')?   						# FuncionEmbebidaStringsJoin
-	| 'len(' IDENTIFICADOR ')' (';')?                      							# FuncionEmbebidaLen
+	| 'len(' IDENTIFICADOR acceso_len ')' (';')?                      				# FuncionEmbebidaLen
 	| operador='-' izquierda=expresion                                         		# NegacionUnaria
 	| expresion llamada+ (';')?                                                     # LlamadaFuncion
 	| operador='!' izquierda=expresion                                       		# NegacionLogica
@@ -103,6 +103,8 @@ expresion:
 	| IDENTIFICADOR '[' indice=expresion ']' '=' valornuevo=expresion       		# AsignacionArreglo
 	| IDENTIFICADOR ('[' expresion ']')+ '=' valornuevo=expresion  					# AsignacionMatriz
 	| IDENTIFICADOR '=' expresion                        							# AsignacionVariable
+	| IDENTIFICADOR '+''+'                                							# Incremento
+	| IDENTIFICADOR '-''-'                                							# Decremento
 	| IDENTIFICADOR '+=' expresion                       							# AsignacionVariableSuma
 	| IDENTIFICADOR '-=' expresion                       							# AsignacionVariableResta
 	| BOOLEANO                                           							# Booleano
@@ -113,6 +115,9 @@ expresion:
 	| IDENTIFICADOR                                      							# Identificador
 	| '(' expresion ')'                                  							# Parentesis
 	| IDENTIFICADOR  '{' atributos_instancia '}'	(';')?							# AsignacionInstancia
+	;
+
+acceso_len:('['expresion']')+
 	;
 
 atributos_instancia: IDENTIFICADOR ':' expresion (',' IDENTIFICADOR ':' expresion)* 

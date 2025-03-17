@@ -474,12 +474,32 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitFuncionEmbebidaAppend([NotNull] LanguageParser.FuncionEmbebidaAppendContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>Decremento</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDecremento([NotNull] LanguageParser.DecrementoContext context);
+	/// <summary>
+	/// Visit a parse tree produced by the <c>Incremento</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitIncremento([NotNull] LanguageParser.IncrementoContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>Identificador</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitIdentificador([NotNull] LanguageParser.IdentificadorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="LanguageParser.acceso_len"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAcceso_len([NotNull] LanguageParser.Acceso_lenContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="LanguageParser.atributos_instancia"/>.
 	/// </summary>
