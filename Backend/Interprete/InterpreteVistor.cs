@@ -6,7 +6,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 {
     private static readonly HashSet<string> PalabrasReservadas = new HashSet<string>
     {
-        "if", "else", "while", "for", "return", "class", "public", "private", "static", "void"
+        "if", "else", "while", "for", "return", "class", "public", "private", "static", "void", 
     };
 
 
@@ -1136,12 +1136,12 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
             if (ValorExistente is ValorNil)
             {
-                // Obtener el tipo esperado desde la definición del struct
                 var DefinicionStruct = EntornoActual.ObtenerStruct(InstanciaModificable.NombreStruct);
-                if (!DefinicionStruct.TryGetValue(AtributoFinal, out TipoEsperado))
+                if (!DefinicionStruct.TryGetValue(AtributoFinal, out string? tipoEsperadoNullable) || tipoEsperadoNullable == null)
                 {
                     throw new Exception($"Error: El atributo '{AtributoFinal}' no existe en la definición del struct '{InstanciaModificable.NombreStruct}'.");
                 }
+                TipoEsperado = tipoEsperadoNullable;
             }
             else
             {
