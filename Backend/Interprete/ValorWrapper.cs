@@ -16,6 +16,8 @@ public record ValorFuncion(Invocable Invocable, string identificador) : ValorWra
 
 public record ValorVoid : ValorWrapper;
 
+public record ValorNil : ValorWrapper;
+
 public record ValorStruct(Dictionary<string, ValorWrapper> Atributos, string NombreStruct) : ValorWrapper
 {
     public ValorWrapper ObtenerAtributo(string atributo)

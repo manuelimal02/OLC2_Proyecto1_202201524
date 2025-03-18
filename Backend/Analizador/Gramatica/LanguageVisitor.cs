@@ -432,6 +432,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitCadena([NotNull] LanguageParser.CadenaContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>Nil</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitNil([NotNull] LanguageParser.NilContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>NegacionLogica</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>

@@ -52,7 +52,7 @@ tipo_funcion: TIPO
 declaracion_struct: 'type' IDENTIFICADOR 'struct' '{' atributos* '}'											# DeclaracionStruct
 	;
 
-atributos: tipo_struct IDENTIFICADOR (';')? (tipo_struct IDENTIFICADOR (';')? )*													
+atributos: IDENTIFICADOR tipo_struct  (';')? (IDENTIFICADOR tipo_struct (';')? )*													
 	;
 
 tipo_struct: TIPO
@@ -112,6 +112,7 @@ expresion:
 	| CARACTER                                           							# Caracter
 	| CADENA                                             							# Cadena
 	| ENTERO                                             							# Entero
+	| 'nil'																			# Nil	
 	| IDENTIFICADOR                                      							# Identificador
 	| '(' expresion ')'                                  							# Parentesis
 	| IDENTIFICADOR  '{' atributos_instancia '}'	(';')?							# AsignacionInstancia

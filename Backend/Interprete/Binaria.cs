@@ -151,6 +151,10 @@ public class Binaria
         // float64 == int = bool
         if (Izquierda is ValorFloat64 izqFloat2 && Derecha is ValorInt derInt2)
             return new ValorBoolean(izqFloat2.Valor == derInt2.Valor);
+        // Soporte para nil
+        if (Izquierda is ValorNil && Derecha is ValorNil)
+            return new ValorBoolean(true);
+            
         throw new Exception("Tipos de datos no soportados para la operación ==");
     }
 

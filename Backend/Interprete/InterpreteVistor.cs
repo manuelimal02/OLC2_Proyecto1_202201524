@@ -38,6 +38,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ValorBoolean _ => "bool",
             ValorRune _ => "rune",
             ValorVoid _ => "void",
+            ValorNil _ => "nil",
             ValorSlice Slice => Slice.Tipo,
             ValorFuncion _ => "funcion",
             ValorStruct Struct => Struct.NombreStruct, 
@@ -129,6 +130,11 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string caracter = context.CARACTER().GetText();
         return new ValorRune(caracter[1]);
+    }
+    // VisitNil
+    public override ValorWrapper VisitNil(LanguageParser.NilContext context)
+    {
+        return new ValorNil();
     }
     // VisitIdentificador
     public override ValorWrapper VisitIdentificador(LanguageParser.IdentificadorContext context)
@@ -973,29 +979,30 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string NombreStruct = context.IDENTIFICADOR().GetText();
         Dictionary<string, string> AtributoStruct = new();
-
+        EntornoActual.DeclararStruct(NombreStruct, AtributoStruct);
         foreach (var Atributo in context.atributos())
         {
             for (int i = 0; i < Atributo.tipo_struct().Length; i++)
             {
                 string TipoAtributo = Atributo.tipo_struct(i).GetText();
                 string NombreAtributo = Atributo.IDENTIFICADOR(i).GetText();
-
+                if (TipoAtributo == NombreStruct)
+                {
+                    AtributoStruct.Add(NombreAtributo, TipoAtributo);
+                    continue;
+                }
                 if (!EsTipoPrimitivo(TipoAtributo) && !EntornoActual.ExisteStruct(TipoAtributo))
                 {
                     throw new Exception($"Error: Se intenta usar el struct '{TipoAtributo}', pero no está definido.");
                 }
-
                 if (AtributoStruct.ContainsKey(NombreAtributo))
                 {
-                    throw new Exception($"Error: El NombreAtributo '{NombreAtributo}' ya está definido en el struct '{NombreStruct}'.");
+                    throw new Exception($"Error: El atributo '{NombreAtributo}' ya está definido en el struct '{NombreStruct}'.");
                 }
 
                 AtributoStruct.Add(NombreAtributo, TipoAtributo);
             }
         }
-
-        EntornoActual.DeclararStruct(NombreStruct, AtributoStruct);
         return ValorVoid;
     }
 
@@ -1023,7 +1030,14 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
             string TipoAtributoEsperado = AtributosStruct[NombreAtributo];
 
-            if (!ObtenerTipo(ValorAtributo).Equals(TipoAtributoEsperado))
+            if (ValorAtributo is ValorNil)
+            {
+                if (EsTipoPrimitivo(TipoAtributoEsperado))
+                {
+                    throw new Exception($"Error: El Atributo '{NombreAtributo}' de '{NombreStruct}' no puede ser 'nil' porque se esperaba un tipo primitivo '{TipoAtributoEsperado}'.");
+                }
+            }
+            else if (!ObtenerTipo(ValorAtributo).Equals(TipoAtributoEsperado))
             {
                 throw new Exception($"Error: El Atributo '{NombreAtributo}' de '{NombreStruct}' esperaba un Atributo de tipo '{TipoAtributoEsperado}', pero se recibió '{ObtenerTipo(ValorAtributo)}'.");
             }
@@ -1118,19 +1132,32 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         if (InstanciaActual is ValorStruct InstanciaModificable)
         {
             ValorWrapper ValorExistente = InstanciaModificable.ObtenerAtributo(AtributoFinal);
+            string TipoEsperado;
 
-            if (!ObtenerTipo(NuevoValor).Equals(ObtenerTipo(ValorExistente), StringComparison.Ordinal))
+            if (ValorExistente is ValorNil)
             {
-                throw new Exception($"Error: No se puede asignar un valor de tipo '{ObtenerTipo(NuevoValor)}' al atributo '{AtributoFinal}' de tipo '{ObtenerTipo(ValorExistente)}'.");
+                // Obtener el tipo esperado desde la definición del struct
+                var DefinicionStruct = EntornoActual.ObtenerStruct(InstanciaModificable.NombreStruct);
+                if (!DefinicionStruct.TryGetValue(AtributoFinal, out TipoEsperado))
+                {
+                    throw new Exception($"Error: El atributo '{AtributoFinal}' no existe en la definición del struct '{InstanciaModificable.NombreStruct}'.");
+                }
+            }
+            else
+            {
+                // Obtener el tipo desde el valor actual
+                TipoEsperado = ObtenerTipo(ValorExistente);
+            }
+
+            if (!ObtenerTipo(NuevoValor).Equals(TipoEsperado, StringComparison.Ordinal))
+            {
+                throw new Exception($"Error: No se puede asignar un valor de tipo '{ObtenerTipo(NuevoValor)}' al atributo '{AtributoFinal}' de tipo '{TipoEsperado}'.");
             }
 
             // Asignar nuevo valor
             InstanciaModificable.AsignarAtributo(AtributoFinal, NuevoValor);
         }
-        else
-        {
-            throw new Exception($"Error: No se puede asignar a '{AtributoFinal}' porque '{InstanciaActual}' no es un struct.");
-        }
+
 
         return NuevoValor;
     }
