@@ -15,7 +15,7 @@ declaracion_variable: 'var' IDENTIFICADOR TIPO '=' expresion (';')? # Declaracio
 	| IDENTIFICADOR ':=' expresion (';')?                           # DeclaracionImplicita
 	;
 
-declaracion_arreglo: IDENTIFICADOR ':=' '[' ']' TIPO '{' (expresion (',' expresion)*) '}' (';')? 	# DeclaracionArregloExplicita
+declaracion_arreglo: IDENTIFICADOR ':=' expresion													# DeclaracionArregloExplicita
 	| 'var' IDENTIFICADOR '[' ']' TIPO  (';')? 														# DeclaracionArregloPorDefecto
 	;
 
@@ -115,6 +115,7 @@ expresion:
 	| IDENTIFICADOR                                      							# Identificador
 	| '(' expresion ')'                                  							# Parentesis
 	| IDENTIFICADOR  '{' atributos_instancia '}'	(';')?							# AsignacionInstancia
+	| '[' ']' TIPO '{' (expresion (',' expresion)*) '}' (';')?						# CreacionArreglo
 	;
 
 acceso_len:('['expresion']')+

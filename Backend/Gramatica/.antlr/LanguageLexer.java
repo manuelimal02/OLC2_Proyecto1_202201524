@@ -49,7 +49,7 @@ public class LanguageLexer extends Lexer {
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, "'var'", "'='", "';'", "':='", "'['", "']'", "'{'", "','", "'}'", 
+			null, "'var'", "'='", "';'", "':='", "'['", "']'", "'{'", "'}'", "','", 
 			"'func'", "'('", "')'", "'type'", "'struct'", "'fmt.Println('", "'if'", 
 			"'else'", "'switch'", "'for'", "'range'", "'break'", "'continue'", "'return'", 
 			"'case'", "':'", "'default'", "'append('", "'strconv.Atoi('", "'strconv.ParseFloat('", 
@@ -261,8 +261,8 @@ public class LanguageLexer extends Lexer {
 		"\u0005=\u0000\u0000\u0085\b\u0001\u0000\u0000\u0000\u0086\u0087\u0005"+
 		"[\u0000\u0000\u0087\n\u0001\u0000\u0000\u0000\u0088\u0089\u0005]\u0000"+
 		"\u0000\u0089\f\u0001\u0000\u0000\u0000\u008a\u008b\u0005{\u0000\u0000"+
-		"\u008b\u000e\u0001\u0000\u0000\u0000\u008c\u008d\u0005,\u0000\u0000\u008d"+
-		"\u0010\u0001\u0000\u0000\u0000\u008e\u008f\u0005}\u0000\u0000\u008f\u0012"+
+		"\u008b\u000e\u0001\u0000\u0000\u0000\u008c\u008d\u0005}\u0000\u0000\u008d"+
+		"\u0010\u0001\u0000\u0000\u0000\u008e\u008f\u0005,\u0000\u0000\u008f\u0012"+
 		"\u0001\u0000\u0000\u0000\u0090\u0091\u0005f\u0000\u0000\u0091\u0092\u0005"+
 		"u\u0000\u0000\u0092\u0093\u0005n\u0000\u0000\u0093\u0094\u0005c\u0000"+
 		"\u0000\u0094\u0014\u0001\u0000\u0000\u0000\u0095\u0096\u0005(\u0000\u0000"+

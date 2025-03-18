@@ -369,6 +369,13 @@ public interface ILanguageVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitRelacional([NotNull] LanguageParser.RelacionalContext context);
 	/// <summary>
+	/// Visit a parse tree produced by the <c>CreacionArreglo</c>
+	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitCreacionArreglo([NotNull] LanguageParser.CreacionArregloContext context);
+	/// <summary>
 	/// Visit a parse tree produced by the <c>LlamadaFuncion</c>
 	/// labeled alternative in <see cref="LanguageParser.expresion"/>.
 	/// </summary>

@@ -14,7 +14,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public Entorno EntornoActual = new Entorno(null);
     private ValorWrapper ValorVoid = new ValorVoid();
 
-    private ValorFuncion MainFunction = null;
+    private ValorFuncion? MainFunction = null;
     public string ObtenerValor(ValorWrapper valor)
     {
         return valor switch
@@ -67,7 +67,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             catch (Exception ex)
             {
-                throw new Exception("Error al ejecutar la función main: " + ex.Message);
+                throw new Exception(ex.Message);
             }
         }
         else
@@ -410,26 +410,30 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
         throw new Exception("Asignación: Tipo de Dato: " + ObtenerTipo(izquierda) + " No Coincide con el Valor: " + ObtenerTipo(variable));
     }
+
+    // VisitCreacionArreglo 
+    public override ValorWrapper VisitCreacionArreglo(LanguageParser.CreacionArregloContext context)
+    {
+        List<ValorWrapper> ValoresArreglo = new List<ValorWrapper>();
+        string TipoArreglo = context.TIPO().GetText();
+        foreach (var expre in context.expresion())
+        {
+            ValorWrapper ValoresArregloAuxiliar = Visit(expre);
+            if (ObtenerTipo(ValoresArregloAuxiliar) != TipoArreglo)
+            {
+                throw new Exception("Creación de Arreglo: Tipo de Dato Arreglo: " + TipoArreglo + " No Coincide con el Valor: " + ObtenerTipo(ValoresArregloAuxiliar));
+            }
+            ValoresArreglo.Add(ValoresArregloAuxiliar);
+        }
+        return new ValorSlice(ValoresArreglo, TipoArreglo);
+    }
     // VisitDeclaracionArregloExplicita
     public override ValorWrapper VisitDeclaracionArregloExplicita(LanguageParser.DeclaracionArregloExplicitaContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
         //if (PalabrasReservadas.Contains(identificador))
         //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
-        
-        string TipoArreglo = context.TIPO().GetText();
-        List<ValorWrapper> ArregloAuxiliar = new List<ValorWrapper>();
-
-        foreach (var expre in context.expresion())
-        {
-            ValorWrapper ValoresArreglo = Visit(expre);
-            if (ObtenerTipo(ValoresArreglo) != TipoArreglo)
-            {
-                throw new Exception("Declaración de Arreglo: Tipo de Dato Arreglo: " + TipoArreglo + " No Coincide con el Valor: " + ObtenerTipo(ValoresArreglo));
-            }
-            ArregloAuxiliar.Add(ValoresArreglo);
-        }
-        ValorWrapper NuevoArreglo = new ValorSlice(ArregloAuxiliar, TipoArreglo);
+        ValorWrapper NuevoArreglo = Visit(context.expresion());
         EntornoActual.Declarar(identificador, NuevoArreglo);
         return ValorVoid;
     }
