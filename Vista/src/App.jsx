@@ -15,42 +15,40 @@ function App() {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Respuesta del servidor:", data);
+        setSalida('');
+        console.log("Respuesta:", data);
         setSalida(data?.result || data?.error);
       })
       .catch((error) => {
-        console.error("Error en la petición:", error);
+        setSalida('');
+        console.error("Error:", error);
         setSalida(`Error: ${error.message}`);
       });
   };
 
-  const handleDownloadAST = () => {
-    fetch("http://localhost:5077/Controlador/Graficar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: Entrada }),
-    })
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Error al generar el AST");
-        }
-        return response.blob();
-      })
-      .then(blob => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "AST.png";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
-      })
-      .catch(error => {
-        console.error("Error en la descarga:", error);
-      });
+  const handleDownloadTablaSimbolos = async () => {
+    try {
+      const response = await fetch("http://localhost:5077/Controlador/DescargarReporteTabla");
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        setSalida(`Error Al Descargar La Tabla De Símbolos: ${errorData?.error}`);
+        return;
+      }
+  
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "TablaSimbolos.html";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (error) {
+      alert("Error al descargar la tabla de símbolos.");
+    }
   };
-
+  
   return (
     <div className="container">
       <div className="navbar">
@@ -72,8 +70,8 @@ function App() {
             <h2>Reportes</h2>
             <div className="dropdown-content">
               <button id="TablaErrores">Tabla De Errores</button>
-              <button id="TablaSimbolos">Tabla de Símbolos</button>
-              <button id="ReporteAST" onClick={handleDownloadAST}>Reporte de AST</button>
+              <button id="TablaSimbolos" onClick={handleDownloadTablaSimbolos}>Tabla De Símbolos</button>
+              <button id="ReporteAST">Reporte de AST</button>
             </div>
           </div>
 

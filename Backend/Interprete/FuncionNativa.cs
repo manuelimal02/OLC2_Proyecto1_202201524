@@ -46,7 +46,7 @@ public class FuncionForanea : Invocable
                 }
                 else
                 {
-                    NuevoEntorno.Declarar(NombreParametro, argumentos[i]);
+                    NuevoEntorno.Declarar(NombreParametro, argumentos[i],0,0);
                 }
             }
         }

@@ -12,6 +12,8 @@ namespace Backend.Controllers
     {
         private readonly ILogger<Controlador> _logger;
 
+        private static string UltimoReporteHtml = "";
+
         public Controlador(ILogger<Controlador> logger)
         {
             _logger = logger;
@@ -43,11 +45,16 @@ namespace Backend.Controllers
             Parser.RemoveErrorListeners();
             Parser.AddErrorListener(new ErrorSintactico());
 
+            Entorno.TablaGlobalSimbolos.Clear();
+
             try
             {
                 var ArbolSintactico = Parser.program();
                 var PatronVisitor = new InterpreteVisitor();
                 PatronVisitor.Visit(ArbolSintactico);
+
+                UltimoReporteHtml = PatronVisitor.EntornoActual.ExportarTablaHtml();
+
                 return Ok(new { result = PatronVisitor.Salida });
             }
             catch (ParseCanceledException ex)
@@ -63,5 +70,18 @@ namespace Backend.Controllers
                 return BadRequest(new { error = ex.Message });
             }
         }
+
+        [HttpGet("DescargarReporteTabla")]
+        public IActionResult DescargarReporteHtml()
+        {
+            if (string.IsNullOrEmpty(UltimoReporteHtml))
+            {
+                return BadRequest(new { error = "No hay un reporte disponible. Compila primero." });
+            }
+            string NombreArchivo = "TablaSimbolos.html";
+            byte[] NombreEnBytes = System.Text.Encoding.UTF8.GetBytes(UltimoReporteHtml);
+            return File(NombreEnBytes, "text/html", NombreArchivo);
+        }
+
     }
 }

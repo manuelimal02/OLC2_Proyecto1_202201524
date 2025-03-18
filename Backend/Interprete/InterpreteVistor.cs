@@ -24,6 +24,8 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ValorString v => v.Valor,
             ValorBoolean v => v.Valor.ToString(),
             ValorRune v => v.Valor.ToString(),
+            ValorVoid _ => "void",
+            ValorNil _ => "nil",
             _ => throw new ArgumentException("Obtener Valor: Tipo de valor no soportado")
         };
     }
@@ -39,8 +41,8 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ValorRune _ => "rune",
             ValorVoid _ => "void",
             ValorNil _ => "nil",
-            ValorSlice Slice => Slice.Tipo,
             ValorFuncion _ => "funcion",
+            ValorSlice Slice => Slice.Tipo,
             ValorStruct Struct => Struct.NombreStruct, 
             _ => throw new ArgumentException("Obtener Tipo: Tipo de valor no soportado")
         };
@@ -151,12 +153,12 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string tipo = context.TIPO().GetText();
         if (expresion is ValorInt && tipo == "float64"){
             expresion = new ValorFloat64(float.Parse(ObtenerValor(expresion), CultureInfo.InvariantCulture));
-            EntornoActual.Declarar(identificador, expresion);
+            EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column);
             return ValorVoid;
         } else if (!ObtenerTipo(expresion).Equals(tipo, StringComparison.Ordinal)){
             throw new Exception("Declaración: Tipo de Dato: " + tipo + " No Coincide con el Valor: " + ObtenerTipo(expresion));
         }else{
-            EntornoActual.Declarar(identificador, expresion);
+            EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column);
             return ValorVoid;
         }
     }
@@ -167,7 +169,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         //if (PalabrasReservadas.Contains(identificador))
         //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
         ValorWrapper expresion = Visit(context.expresion());
-        EntornoActual.Declarar(identificador, expresion);
+        EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column);
         return ValorVoid;
     }
     // VisitDeclaracionPorDefecto
@@ -179,19 +181,19 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string tipo = context.TIPO().GetText();
         switch (tipo){
             case "int":
-                EntornoActual.Declarar(identificador, new ValorInt(0));
+                EntornoActual.Declarar(identificador, new ValorInt(0), context.Start.Line, context.Start.Column);
                 break;
             case "float64":
-                EntornoActual.Declarar(identificador, new ValorFloat64(0));
+                EntornoActual.Declarar(identificador, new ValorFloat64(0), context.Start.Line, context.Start.Column);
                 break;
             case "string":
-                EntornoActual.Declarar(identificador, new ValorString(""));
+                EntornoActual.Declarar(identificador, new ValorString(""), context.Start.Line, context.Start.Column);
                 break;
             case "bool":
-                EntornoActual.Declarar(identificador, new ValorBoolean(false));
+                EntornoActual.Declarar(identificador, new ValorBoolean(false), context.Start.Line, context.Start.Column);
                 break;
             case "rune":
-                EntornoActual.Declarar(identificador, new ValorRune('0'));
+                EntornoActual.Declarar(identificador, new ValorRune('0'), context.Start.Line, context.Start.Column);
                 break;
             default:
                 throw new Exception("Tipo de Dato: " + tipo + " No Encontrado");
@@ -261,7 +263,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         return $"{StructValorAuxiliar.NombreStruct}{{ {string.Join(", ", atributos)} }}";
     }
 
-
     // VisitFuncionEmbebidaAtoi
     public override ValorWrapper VisitFuncionEmbebidaAtoi(LanguageParser.FuncionEmbebidaAtoiContext context)
     {
@@ -321,7 +322,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         Binaria binaria = new Binaria(izquierda, derecha, operador);
         return binaria.RealizarOperacion();
     }
-    
     //VisitNegacionUnaria
     public override ValorWrapper VisitNegacionUnaria(LanguageParser.NegacionUnariaContext context)
     {
@@ -395,7 +395,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
         throw new Exception("Asignación: Tipo de Dato: " + ObtenerTipo(izquierda) + " No Coincide con el Valor: " + ObtenerTipo(variable));
     }
-
     // VisitAsignacionVariableResta
     public override ValorWrapper VisitAsignacionVariableResta(LanguageParser.AsignacionVariableRestaContext context)
     {
@@ -440,7 +439,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         //if (PalabrasReservadas.Contains(identificador))
         //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
         ValorWrapper NuevoArreglo = Visit(context.expresion());
-        EntornoActual.Declarar(identificador, NuevoArreglo);
+        EntornoActual.Declarar(identificador, NuevoArreglo, context.Start.Line, context.Start.Column);
         return ValorVoid;
     }
     // VisitDeclaracionArregloPorDefecto
@@ -452,7 +451,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string TipoArreglo = context.TIPO().GetText();
         List<ValorWrapper> ArregloAuxiliar = new List<ValorWrapper>();
         ValorWrapper NuevoArreglo = new ValorSlice(ArregloAuxiliar, TipoArreglo);
-        EntornoActual.Declarar(identificador, NuevoArreglo);
+        EntornoActual.Declarar(identificador, NuevoArreglo, context.Start.Line, context.Start.Column);
         return ValorVoid;
     }
     // VisitFuncionEmbebidaSlicesIndex
@@ -760,8 +759,8 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             Entorno EntornoPrevio = EntornoActual;
             EntornoActual = new Entorno(EntornoPrevio);
             // Asignar índice y valor dentro del nuevo EntornoActual
-            EntornoActual.Declarar(Indice, new ValorInt(i));
-            EntornoActual.Declarar(Valor, Arreglo1.Valores[i]);
+            EntornoActual.Declarar(Indice, new ValorInt(i), context.Start.Line, context.Start.Column);
+            EntornoActual.Declarar(Valor, Arreglo1.Valores[i], context.Start.Line, context.Start.Column);
             // Ejecutar la sentencia dentro del for
             Visit(context.sentencia());
             EntornoActual = EntornoPrevio;
@@ -776,7 +775,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string TipoMatriz = context.TIPO().GetText();
         // Construir la Matriz visitando el contenido
         ValorWrapper Matriz = VisitContenidoMatriz(context.contenido_matriz(), TipoMatriz);
-        EntornoActual.Declarar(identificador, Matriz);
+        EntornoActual.Declarar(identificador, Matriz, context.Start.Line, context.Start.Column);
         return ValorVoid;
     }
 
@@ -964,7 +963,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string identificador = context.IDENTIFICADOR().GetText();
         var funcionForranea = new FuncionForanea(EntornoActual, context);
         var valorFuncion = new ValorFuncion(funcionForranea, identificador);
-        EntornoActual.Declarar(identificador, valorFuncion);
+        EntornoActual.Declarar(identificador, valorFuncion, context.Start.Line, context.Start.Column);
 
         if (identificador == "main")
         {
