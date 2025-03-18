@@ -501,13 +501,32 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
-
-        if (ArregloActual is ValorSlice Arreglo)
+        if (context.expresion().Length > 0)
         {
-            return new ValorInt(Arreglo.Valores.Count);
+            foreach (var expr in context.expresion())
+            {
+                ValorWrapper IndiceAuxiliar = Visit(expr);
+                if (!(IndiceAuxiliar is ValorInt indice))
+                    throw new Exception("Función Len: El índice debe ser un entero");
+                if (ArregloActual is ValorSlice ArregloAuxiliar)
+                {
+                    if (indice.Valor < 0 || indice.Valor >= ArregloAuxiliar.Valores.Count)
+                        throw new Exception($"Función Len: Índice fuera de rango en {identificador}");
+                    ArregloActual = ArregloAuxiliar.Valores[indice.Valor];
+                }
+                else
+                {
+                    throw new Exception($"Función Len: La variable {identificador} no es un arreglo en el nivel esperado");
+                }
+            }
         }
-        throw new Exception("Función Len: La Variable: " + identificador + " No es un Arreglo");
+        if (ArregloActual is ValorSlice ArregloFinal)
+        {
+            return new ValorInt(ArregloFinal.Valores.Count);
+        }
+        throw new Exception($"Función Len: {identificador} no es un arreglo");
     }
+
     // VisitFuncionEmbebidaAppend
     public override ValorWrapper VisitFuncionEmbebidaAppend(LanguageParser.FuncionEmbebidaAppendContext context)
     {
@@ -1066,7 +1085,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             else
             {
-                throw new Exception($"Error: '{NombreInstancia}' no es una estructura válida para acceder a '{atributo}'.");
+                throw new Exception($"Error: '{NombreInstancia}' no es una ArregloActual válida para acceder a '{atributo}'.");
             }
         }
         return InstanciaActual;
@@ -1090,7 +1109,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             else
             {
-                throw new Exception($"Error: '{NombreInstancia}' no es una estructura válida para acceder a '{atributo}'.");
+                throw new Exception($"Error: '{NombreInstancia}' no es una ArregloActual válida para acceder a '{atributo}'.");
             }
         }
 

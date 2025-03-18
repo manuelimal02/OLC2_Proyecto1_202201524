@@ -86,7 +86,7 @@ expresion:
 	| 'reflect.TypeOf(' expresion ')' (';')?                						# FuncionEmbebidaReflectTypeOf
 	| 'slices.Index(' IDENTIFICADOR ',' expresion ')' (';')?                 		# FuncionEmbebidaSlicesIndex
 	| 'strings.Join(' IDENTIFICADOR ',' expresion ')' (';')?   						# FuncionEmbebidaStringsJoin
-	| 'len(' IDENTIFICADOR acceso_len ')' (';')?                      				# FuncionEmbebidaLen
+	| 'len(' IDENTIFICADOR (('[' expresion ']')*) ')' (';')?   						# FuncionEmbebidaLen
 	| operador='-' izquierda=expresion                                         		# NegacionUnaria
 	| expresion llamada+ (';')?                                                     # LlamadaFuncion
 	| operador='!' izquierda=expresion                                       		# NegacionLogica
@@ -116,9 +116,6 @@ expresion:
 	| '(' expresion ')'                                  							# Parentesis
 	| IDENTIFICADOR  '{' atributos_instancia '}'	(';')?							# AsignacionInstancia
 	| '[' ']' TIPO '{' (expresion (',' expresion)*) '}' (';')?						# CreacionArreglo
-	;
-
-acceso_len:('['expresion']')+
 	;
 
 atributos_instancia: IDENTIFICADOR ':' expresion (',' IDENTIFICADOR ':' expresion)* 
