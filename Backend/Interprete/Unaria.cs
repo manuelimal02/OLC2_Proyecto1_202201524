@@ -1,11 +1,13 @@
 public class Unaria {
     private ValorWrapper Izquierda;
     private string Operador;
+    private Antlr4.Runtime.IToken LineaColumna;
 
-    public Unaria(ValorWrapper izquierda, string operador)
+    public Unaria(ValorWrapper izquierda, string operador, Antlr4.Runtime.IToken LineaColumna)
     {
         Izquierda = izquierda;
         Operador = operador;
+        this.LineaColumna = LineaColumna;
     }
     public ValorWrapper RealizarOperacion()
     {
@@ -16,7 +18,7 @@ public class Unaria {
             case "!":
                 return NegacionUnaria();
             default:
-                throw new Exception("Operador: " + Operador + " No Encontrado");
+                throw new ErrorSemantico("Operador: " + Operador + " No Encontrado", this.LineaColumna);
         }
     }
 
@@ -32,7 +34,7 @@ public class Unaria {
         {
             return new ValorFloat64(-((ValorFloat64)Izquierda).Valor);
         }
-        throw new Exception("Tipos de datos no soportados para la operación -");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación -", this.LineaColumna);
     }
 
     public ValorWrapper NegacionUnaria()
@@ -42,7 +44,7 @@ public class Unaria {
         {
             return new ValorBoolean(!((ValorBoolean)Izquierda).Valor);
         }
-        throw new Exception("Tipos de datos no soportados para la operación !");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación !", this.LineaColumna);
     }
 
 }

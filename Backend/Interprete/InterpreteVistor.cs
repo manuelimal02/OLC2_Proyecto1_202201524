@@ -70,12 +70,12 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new ErrorSemantico(ex.Message, context.Start);
             }
         }
         else
         {
-            throw new Exception("No se encontró la función 'main' en el programa.");
+            throw new ErrorSemantico("No se encontró la función 'main' en el programa.", context.Start);
         }
 
         return ValorVoid;
@@ -141,24 +141,24 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     // VisitIdentificador
     public override ValorWrapper VisitIdentificador(LanguageParser.IdentificadorContext context)
     {
-        return EntornoActual.Obtener(context.IDENTIFICADOR().GetText());
+        return EntornoActual.Obtener(context.IDENTIFICADOR().GetText(), context.Start);
     }
     // VisitDeclaracionExplicita
     public override ValorWrapper VisitDeclaracionExplicita(LanguageParser.DeclaracionExplicitaContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
         //if (PalabrasReservadas.Contains(identificador))
-        //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
+        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         ValorWrapper expresion = Visit(context.expresion());
         string tipo = context.TIPO().GetText();
         if (expresion is ValorInt && tipo == "float64"){
             expresion = new ValorFloat64(float.Parse(ObtenerValor(expresion), CultureInfo.InvariantCulture));
-            EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column);
+            EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column, context.Start);
             return ValorVoid;
         } else if (!ObtenerTipo(expresion).Equals(tipo, StringComparison.Ordinal)){
-            throw new Exception("Declaración: Tipo de Dato: " + tipo + " No Coincide con el Valor: " + ObtenerTipo(expresion));
+            throw new ErrorSemantico("Declaración: Tipo de Dato: " + tipo + " No Coincide con el Valor: " + ObtenerTipo(expresion), context.Start);
         }else{
-            EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column);
+            EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column, context.Start);
             return ValorVoid;
         }
     }
@@ -167,9 +167,9 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         //if (PalabrasReservadas.Contains(identificador))
-        //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
+        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         ValorWrapper expresion = Visit(context.expresion());
-        EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column);
+        EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column, context.Start);
         return ValorVoid;
     }
     // VisitDeclaracionPorDefecto
@@ -177,26 +177,26 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         //if (PalabrasReservadas.Contains(identificador))
-        //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
+        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         string tipo = context.TIPO().GetText();
         switch (tipo){
             case "int":
-                EntornoActual.Declarar(identificador, new ValorInt(0), context.Start.Line, context.Start.Column);
+                EntornoActual.Declarar(identificador, new ValorInt(0), context.Start.Line, context.Start.Column, context.Start);
                 break;
             case "float64":
-                EntornoActual.Declarar(identificador, new ValorFloat64(0), context.Start.Line, context.Start.Column);
+                EntornoActual.Declarar(identificador, new ValorFloat64(0), context.Start.Line, context.Start.Column, context.Start);
                 break;
             case "string":
-                EntornoActual.Declarar(identificador, new ValorString(""), context.Start.Line, context.Start.Column);
+                EntornoActual.Declarar(identificador, new ValorString(""), context.Start.Line, context.Start.Column, context.Start);
                 break;
             case "bool":
-                EntornoActual.Declarar(identificador, new ValorBoolean(false), context.Start.Line, context.Start.Column);
+                EntornoActual.Declarar(identificador, new ValorBoolean(false), context.Start.Line, context.Start.Column, context.Start);
                 break;
             case "rune":
-                EntornoActual.Declarar(identificador, new ValorRune('0'), context.Start.Line, context.Start.Column);
+                EntornoActual.Declarar(identificador, new ValorRune('0'), context.Start.Line, context.Start.Column, context.Start);
                 break;
             default:
-                throw new Exception("Tipo de Dato: " + tipo + " No Encontrado");
+                throw new ErrorSemantico("Tipo de Dato: " + tipo + " No Encontrado", context.Start);
             }
         return ValorVoid;
     }
@@ -205,15 +205,15 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         ValorWrapper expresion = Visit(context.expresion());
-        ValorWrapper variable = EntornoActual.Obtener(identificador);
+        ValorWrapper variable = EntornoActual.Obtener(identificador, context.Start);
 
         if (expresion is ValorInt && variable is ValorFloat64){
             expresion = new ValorFloat64(float.Parse(ObtenerValor(expresion), CultureInfo.InvariantCulture));
-            return EntornoActual.Asignar(identificador, expresion);
+            return EntornoActual.Asignar(identificador, expresion, context.Start);
         } else if (ObtenerTipo(expresion).Equals(ObtenerTipo(variable), StringComparison.Ordinal)){
-            return EntornoActual.Asignar(identificador, expresion);
+            return EntornoActual.Asignar(identificador, expresion, context.Start);
         }
-        throw new Exception("Asignación: Tipo de Dato: " + ObtenerTipo(expresion) + " No Coincide con el Valor: " + ObtenerTipo(variable));
+        throw new ErrorSemantico("Asignación: Tipo de Dato: " + ObtenerTipo(expresion) + " No Coincide con el Valor: " + ObtenerTipo(variable), context.Start);
     }
     // VisitFuncionEmbebidaPrintln
     public override ValorWrapper VisitFuncionEmbebidaPrintln(LanguageParser.FuncionEmbebidaPrintlnContext context)
@@ -272,9 +272,9 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             if (int.TryParse(ObtenerValor(expresion), out int result)){
                 return new ValorInt(result);
             }
-            throw new Exception("Función Atoi: Valor: " + ObtenerValor(expresion) + " No es un Entero");
+            throw new ErrorSemantico("Función Atoi: Valor: " + ObtenerValor(expresion) + " No es un Entero", context.Start);
         }
-        throw new Exception("Función Atoi: Tipo de Dato: " + ObtenerTipo(expresion) + " No Coincide con el Valor: string");
+        throw new ErrorSemantico("Función Atoi: Tipo de Dato: " + ObtenerTipo(expresion) + " No Coincide con el Valor: string", context.Start);
 
     }
     // VisitFuncionEmbebidaParseFloat
@@ -285,9 +285,9 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             if (float.TryParse(ObtenerValor(expresion), NumberStyles.Any, CultureInfo.InvariantCulture, out float result)){
                 return new ValorFloat64(result);
             }
-            throw new Exception("Función ParseFloat: Valor: " + ObtenerValor(expresion) + " No es un Decimal");
+            throw new ErrorSemantico("Función ParseFloat: Valor: " + ObtenerValor(expresion) + " No es un Decimal", context.Start);
         }
-        throw new Exception("Función ParseFloat: Tipo de Dato: " + ObtenerTipo(expresion) + " No Coincide con el Valor: string");
+        throw new ErrorSemantico("Función ParseFloat: Tipo de Dato: " + ObtenerTipo(expresion) + " No Coincide con el Valor: string", context.Start);
     }
     //VisitFuncionEmbebidaReflectTypeOf
     public override ValorWrapper VisitFuncionEmbebidaReflectTypeOf(LanguageParser.FuncionEmbebidaReflectTypeOfContext context)
@@ -310,7 +310,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper izquierda = Visit(context.izquierda);
         ValorWrapper derecha = Visit(context.derecha);
         string operador = context.operador.Text;
-        Binaria binaria = new Binaria(izquierda, derecha, operador);
+        Binaria binaria = new Binaria(izquierda, derecha, operador, context.Start);
         return binaria.RealizarOperacion();
     }
     //VisitMultiplicacionDivisionModulo
@@ -319,7 +319,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper izquierda = Visit(context.izquierda);
         ValorWrapper derecha = Visit(context.derecha);
         string operador = context.operador.Text;
-        Binaria binaria = new Binaria(izquierda, derecha, operador);
+        Binaria binaria = new Binaria(izquierda, derecha, operador, context.Start);
         return binaria.RealizarOperacion();
     }
     //VisitNegacionUnaria
@@ -327,7 +327,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         ValorWrapper izquierda = Visit(context.izquierda);
         string operador = context.operador.Text;
-        Unaria unaria = new Unaria(izquierda, operador);
+        Unaria unaria = new Unaria(izquierda, operador, context.Start);
         return unaria.RealizarOperacion();
     }
     //VisitNegacionLogica
@@ -335,7 +335,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         ValorWrapper izquierda = Visit(context.izquierda);
         string operador = context.operador.Text;
-        Unaria unaria = new Unaria(izquierda, operador);
+        Unaria unaria = new Unaria(izquierda, operador, context.Start);
         return unaria.RealizarOperacion();
     }
     //VisitIgualdadDesigualdad
@@ -344,7 +344,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper izquierda = Visit(context.izquierda);
         ValorWrapper derecha = Visit(context.derecha);
         string operador = context.operador.Text;
-        Binaria binaria = new Binaria(izquierda, derecha, operador);
+        Binaria binaria = new Binaria(izquierda, derecha, operador, context.Start);
         return binaria.RealizarOperacion();
     }
     //VisitRelacional
@@ -353,7 +353,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper izquierda = Visit(context.izquierda);
         ValorWrapper derecha = Visit(context.derecha);
         string operador = context.operador.Text;
-        Binaria binaria = new Binaria(izquierda, derecha, operador);
+        Binaria binaria = new Binaria(izquierda, derecha, operador, context.Start);
         return binaria.RealizarOperacion();
     }
 
@@ -363,7 +363,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper izquierda = Visit(context.izquierda);
         ValorWrapper derecha = Visit(context.derecha);
         string operador = context.operador.Text;
-        Binaria binaria = new Binaria(izquierda, derecha, operador);
+        Binaria binaria = new Binaria(izquierda, derecha, operador, context.Start);
         return binaria.RealizarOperacion();
     }
     //VisitLogicoOr
@@ -372,7 +372,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         ValorWrapper izquierda = Visit(context.izquierda);
         ValorWrapper derecha = Visit(context.derecha);
         string operador = context.operador.Text;
-        Binaria binaria = new Binaria(izquierda, derecha, operador);
+        Binaria binaria = new Binaria(izquierda, derecha, operador, context.Start);
         return binaria.RealizarOperacion();
     }
     //VisitAsignacionVariableSuma
@@ -382,18 +382,18 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         // Izquierda
         ValorWrapper izquierda = Visit(context.expresion());
         // Derecha
-        ValorWrapper variable = EntornoActual.Obtener(identificador);
+        ValorWrapper variable = EntornoActual.Obtener(identificador, context.Start);
 
         if (izquierda is ValorInt && variable is ValorFloat64){
-            Binaria binaria = new Binaria(variable, izquierda, "+");
+            Binaria binaria = new Binaria(variable, izquierda, "+", context.Start);
             ValorWrapper resultado = binaria.RealizarOperacion();
-            return EntornoActual.Asignar(identificador, resultado);
+            return EntornoActual.Asignar(identificador, resultado, context.Start);
         } else if (ObtenerTipo(izquierda).Equals(ObtenerTipo(variable), StringComparison.Ordinal)){
-            Binaria binaria = new Binaria(variable, izquierda, "+");
+            Binaria binaria = new Binaria(variable, izquierda, "+", context.Start);
             ValorWrapper resultado = binaria.RealizarOperacion();
-            return EntornoActual.Asignar(identificador, resultado);
+            return EntornoActual.Asignar(identificador, resultado, context.Start);
         }
-        throw new Exception("Asignación: Tipo de Dato: " + ObtenerTipo(izquierda) + " No Coincide con el Valor: " + ObtenerTipo(variable));
+        throw new ErrorSemantico("Asignación: Tipo de Dato: " + ObtenerTipo(izquierda) + " No Coincide con el Valor: " + ObtenerTipo(variable), context.Start);
     }
     // VisitAsignacionVariableResta
     public override ValorWrapper VisitAsignacionVariableResta(LanguageParser.AsignacionVariableRestaContext context)
@@ -402,18 +402,18 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         // Izquierda
         ValorWrapper izquierda = Visit(context.expresion());
         // Derecha
-        ValorWrapper variable = EntornoActual.Obtener(identificador);
+        ValorWrapper variable = EntornoActual.Obtener(identificador, context.Start);
 
         if (izquierda is ValorInt && variable is ValorFloat64){
-            Binaria binaria = new Binaria(variable, izquierda, "-");
+            Binaria binaria = new Binaria(variable, izquierda, "-", context.Start);
             ValorWrapper resultado = binaria.RealizarOperacion();
-            return EntornoActual.Asignar(identificador, resultado);
+            return EntornoActual.Asignar(identificador, resultado, context.Start);
         } else if (ObtenerTipo(izquierda).Equals(ObtenerTipo(variable), StringComparison.Ordinal)){
-            Binaria binaria = new Binaria(variable, izquierda, "-");
+            Binaria binaria = new Binaria(variable, izquierda, "-", context.Start);
             ValorWrapper resultado = binaria.RealizarOperacion();
-            return EntornoActual.Asignar(identificador, resultado);
+            return EntornoActual.Asignar(identificador, resultado, context.Start);
         }
-        throw new Exception("Asignación: Tipo de Dato: " + ObtenerTipo(izquierda) + " No Coincide con el Valor: " + ObtenerTipo(variable));
+        throw new ErrorSemantico("Asignación: Tipo de Dato: " + ObtenerTipo(izquierda) + " No Coincide con el Valor: " + ObtenerTipo(variable), context.Start);
     }
 
     // VisitCreacionArreglo 
@@ -426,7 +426,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             ValorWrapper ValoresArregloAuxiliar = Visit(expre);
             if (ObtenerTipo(ValoresArregloAuxiliar) != TipoArreglo)
             {
-                throw new Exception("Creación de Arreglo: Tipo de Dato Arreglo: " + TipoArreglo + " No Coincide con el Valor: " + ObtenerTipo(ValoresArregloAuxiliar));
+                throw new ErrorSemantico("Creación de Arreglo: Tipo de Dato Arreglo: " + TipoArreglo + " No Coincide con el Valor: " + ObtenerTipo(ValoresArregloAuxiliar), context.Start);
             }
             ValoresArreglo.Add(ValoresArregloAuxiliar);
         }
@@ -437,9 +437,9 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         //if (PalabrasReservadas.Contains(identificador))
-        //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
+        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         ValorWrapper NuevoArreglo = Visit(context.expresion());
-        EntornoActual.Declarar(identificador, NuevoArreglo, context.Start.Line, context.Start.Column);
+        EntornoActual.Declarar(identificador, NuevoArreglo, context.Start.Line, context.Start.Column, context.Start);
         return ValorVoid;
     }
     // VisitDeclaracionArregloPorDefecto
@@ -447,25 +447,25 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         //if (PalabrasReservadas.Contains(identificador))
-        //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
+        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         string TipoArreglo = context.TIPO().GetText();
         List<ValorWrapper> ArregloAuxiliar = new List<ValorWrapper>();
         ValorWrapper NuevoArreglo = new ValorSlice(ArregloAuxiliar, TipoArreglo);
-        EntornoActual.Declarar(identificador, NuevoArreglo, context.Start.Line, context.Start.Column);
+        EntornoActual.Declarar(identificador, NuevoArreglo, context.Start.Line, context.Start.Column, context.Start);
         return ValorVoid;
     }
     // VisitFuncionEmbebidaSlicesIndex
     public override ValorWrapper VisitFuncionEmbebidaSlicesIndex(LanguageParser.FuncionEmbebidaSlicesIndexContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
+        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador, context.Start);
 
         if (ArregloActual is ValorSlice Arreglo)
         {
             ValorWrapper ValorBuscado = Visit(context.expresion());
             if(!(Arreglo.Tipo).Equals(ObtenerTipo(ValorBuscado), StringComparison.Ordinal))
             {
-                throw new Exception("Función Slices: Tipo de Dato: " + ObtenerTipo(ValorBuscado) + " No Coincide con el Valor: " + Arreglo.Tipo);
+                throw new ErrorSemantico("Función Slices: Tipo de Dato: " + ObtenerTipo(ValorBuscado) + " No Coincide con el Valor: " + Arreglo.Tipo, context.Start);
             }
             
             for (int i = 0; i < Arreglo.Valores.Count; i++)
@@ -477,51 +477,51 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             return new ValorInt(-1);
         }
-        throw new Exception("Función Slices: La Variable: " + identificador + " No es un Arreglo");
+        throw new ErrorSemantico("Función Slices: La Variable: " + identificador + " No es un Arreglo", context.Start);
     }
 
     // VisitFuncionEmbebidaStringsJoin
     public override ValorWrapper VisitFuncionEmbebidaStringsJoin(LanguageParser.FuncionEmbebidaStringsJoinContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
+        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador, context.Start);
         ValorWrapper Separador = Visit(context.expresion());
 
         if (!(Separador is ValorString))
-            throw new Exception("Función Join: El Separador: " + ObtenerValor(Separador) + " No es un String");
+            throw new ErrorSemantico("Función Join: El Separador: " + ObtenerValor(Separador) + " No es un String", context.Start);
         
         if (ArregloActual is ValorSlice Arreglo1)
             if (Arreglo1.Tipo != "string")
-            throw new Exception("Función Join: Tipo de Dato Arreglo: " + Arreglo1.Tipo + " No es un String");
+            throw new ErrorSemantico("Función Join: Tipo de Dato Arreglo: " + Arreglo1.Tipo + " No es un String", context.Start);
         
         if (ArregloActual is ValorSlice Arreglo2)
         {
             List<string> ValoresArreglo = Arreglo2.Valores.Select(valor => ObtenerValor(valor)).ToList();
             return new ValorString(string.Join(ObtenerValor(Separador), ValoresArreglo));
         }
-        throw new Exception("Función Join: La Variable: " + identificador + " No es un Arreglo");
+        throw new ErrorSemantico("Función Join: La Variable: " + identificador + " No es un Arreglo", context.Start);
     }
     // VisitFuncionEmbebidaLen
     public override ValorWrapper VisitFuncionEmbebidaLen(LanguageParser.FuncionEmbebidaLenContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
+        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador, context.Start);
         if (context.expresion().Length > 0)
         {
             foreach (var expr in context.expresion())
             {
                 ValorWrapper IndiceAuxiliar = Visit(expr);
                 if (!(IndiceAuxiliar is ValorInt indice))
-                    throw new Exception("Función Len: El índice debe ser un entero");
+                    throw new ErrorSemantico("Función Len: El índice debe ser un entero", context.Start);
                 if (ArregloActual is ValorSlice ArregloAuxiliar)
                 {
                     if (indice.Valor < 0 || indice.Valor >= ArregloAuxiliar.Valores.Count)
-                        throw new Exception($"Función Len: Índice fuera de rango en {identificador}");
+                        throw new ErrorSemantico($"Función Len: Índice fuera de rango en {identificador}", context.Start);
                     ArregloActual = ArregloAuxiliar.Valores[indice.Valor];
                 }
                 else
                 {
-                    throw new Exception($"Función Len: La variable {identificador} no es un arreglo en el nivel esperado");
+                    throw new ErrorSemantico($"Función Len: La variable {identificador} no es un arreglo en el nivel esperado", context.Start);
                 }
             }
         }
@@ -529,58 +529,58 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         {
             return new ValorInt(ArregloFinal.Valores.Count);
         }
-        throw new Exception($"Función Len: {identificador} no es un arreglo");
+        throw new ErrorSemantico($"Función Len: {identificador} no es un arreglo", context.Start);
     }
 
     // VisitFuncionEmbebidaAppend
     public override ValorWrapper VisitFuncionEmbebidaAppend(LanguageParser.FuncionEmbebidaAppendContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
+        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador, context.Start);
         ValorWrapper ValorNuevo = Visit(context.expresion());
 
         if (ArregloActual is ValorSlice Arreglo)
         {
             if (!Arreglo.Tipo.Equals(ObtenerTipo(ValorNuevo), StringComparison.Ordinal))
             {
-                throw new Exception("Función Append: Tipo de Dato Arreglo: " + Arreglo.Tipo + " No Coincide con el Valor: " + ObtenerTipo(ValorNuevo));
+                throw new ErrorSemantico("Función Append: Tipo de Dato Arreglo: " + Arreglo.Tipo + " No Coincide con el Valor: " + ObtenerTipo(ValorNuevo), context.Start);
             }
             Arreglo.Valores.Add(ValorNuevo);
             return ArregloActual;
         }
-        throw new Exception("Función Append: La Variable: " + identificador + " No es un Arreglo");
+        throw new ErrorSemantico("Función Append: La Variable: " + identificador + " No es un Arreglo", context.Start);
     }
     // VisitAccesoArreglo
     public override ValorWrapper VisitAccesoArreglo(LanguageParser.AccesoArregloContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
+        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador, context.Start);
         ValorWrapper Indice = Visit(context.expresion());
 
         if (ArregloActual is not ValorSlice Arreglo)
-            throw new Exception("Acceso Arreglo: La Variable: " + identificador + " No es un Arreglo");
+            throw new ErrorSemantico("Acceso Arreglo: La Variable: " + identificador + " No es un Arreglo", context.Start);
         
         if (Indice is not ValorInt IndiceInt)
-            throw new Exception("Acceso Arreglo: Tipo de Dato: " + ObtenerTipo(Indice) + " No es un Entero");
+            throw new ErrorSemantico("Acceso Arreglo: Tipo de Dato: " + ObtenerTipo(Indice) + " No es un Entero", context.Start);
             
         if ((IndiceInt.Valor >= 0) && (IndiceInt.Valor < Arreglo.Valores.Count))
             return Arreglo.Valores[IndiceInt.Valor];
         else
-            throw new Exception("Acceso Arreglo: Indice: " + IndiceInt.Valor + " Fuera de Rango");
+            throw new ErrorSemantico("Acceso Arreglo: Indice: " + IndiceInt.Valor + " Fuera de Rango", context.Start);
     }
     // VisitAsignacionArreglo
     public override ValorWrapper VisitAsignacionArreglo(LanguageParser.AsignacionArregloContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador);
+        ValorWrapper ArregloActual = EntornoActual.Obtener(identificador, context.Start);
         ValorWrapper Indice = Visit(context.indice);
         ValorWrapper ValorNuevo = Visit(context.valornuevo);
 
         if (ArregloActual is not ValorSlice Arreglo)
-            throw new Exception("Asignación Arreglo: La Variable: " + identificador + " No es un Arreglo");
+            throw new ErrorSemantico("Asignación Arreglo: La Variable: " + identificador + " No es un Arreglo", context.Start);
         
         if (Indice is not ValorInt IndiceInt)
-            throw new Exception("Asignación Arreglo: Tipo de Dato: " + ObtenerTipo(Indice) + " No es un Entero");
+            throw new ErrorSemantico("Asignación Arreglo: Tipo de Dato: " + ObtenerTipo(Indice) + " No es un Entero", context.Start);
             
         if ((IndiceInt.Valor >= 0) && (IndiceInt.Valor < Arreglo.Valores.Count))
         {
@@ -589,9 +589,9 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
                 Arreglo.Valores[IndiceInt.Valor] = ValorNuevo;
                 return ValorVoid;
             }
-            throw new Exception("Asignación Arreglo: Tipo de Dato Arreglo: " + Arreglo.Tipo + " No Coincide con el Valor: " + ObtenerTipo(ValorNuevo));
+            throw new ErrorSemantico("Asignación Arreglo: Tipo de Dato Arreglo: " + Arreglo.Tipo + " No Coincide con el Valor: " + ObtenerTipo(ValorNuevo), context.Start);
         }
-        throw new Exception("Asignación Arreglo: Indice: " + IndiceInt.Valor + " Fuera de Rango");
+        throw new ErrorSemantico("Asignación Arreglo: Indice: " + IndiceInt.Valor + " Fuera de Rango", context.Start);
     }
 
     // VisitSentenciaIf
@@ -599,7 +599,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         ValorWrapper Condicion = Visit(context.expresion());
         if (Condicion is not ValorBoolean CondicionBoolean)
-            throw new Exception("Sentencia If: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano");
+            throw new ErrorSemantico("Sentencia If: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano", context.Start);
 
         if (CondicionBoolean.Valor)
         {
@@ -679,7 +679,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         ValorWrapper Condicion = Visit(context.condicion);
         if (Condicion is not ValorBoolean CondicionWhile)
-            throw new Exception("Sentencia For Simple: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano");
+            throw new ErrorSemantico("Sentencia For Simple: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano", context.Start);
         while (CondicionWhile.Valor)
         {
             try
@@ -717,7 +717,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         ValorWrapper Condicion = Visit(context.condicion);
         if (Condicion is not ValorBoolean CondicionWhile)
-            throw new Exception("Sentencia For Compuesto: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano");
+            throw new ErrorSemantico("Sentencia For Compuesto: Tipo de Dato: " + ObtenerTipo(Condicion) + " No es un Booleano", context.Start);
 
         while (CondicionWhile.Valor) 
         {
@@ -748,10 +748,10 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string Valor = context.valor.Text;
         string Slice = context.slice.Text;
 
-        ValorWrapper Arreglo = EntornoActual.Obtener(Slice);
+        ValorWrapper Arreglo = EntornoActual.Obtener(Slice, context.Start);
 
         if (Arreglo is not ValorSlice Arreglo1)
-            throw new Exception("Sentencia For Range: La Variable: " + Slice + " No es un Arreglo");
+            throw new ErrorSemantico("Sentencia For Range: La Variable: " + Slice + " No es un Arreglo", context.Start);
 
         for (int i = 0; i < Arreglo1.Valores.Count; i++)
         {
@@ -759,8 +759,8 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             Entorno EntornoPrevio = EntornoActual;
             EntornoActual = new Entorno(EntornoPrevio);
             // Asignar índice y valor dentro del nuevo EntornoActual
-            EntornoActual.Declarar(Indice, new ValorInt(i), context.Start.Line, context.Start.Column);
-            EntornoActual.Declarar(Valor, Arreglo1.Valores[i], context.Start.Line, context.Start.Column);
+            EntornoActual.Declarar(Indice, new ValorInt(i), context.Start.Line, context.Start.Column, context.Start);
+            EntornoActual.Declarar(Valor, Arreglo1.Valores[i], context.Start.Line, context.Start.Column, context.Start);
             // Ejecutar la sentencia dentro del for
             Visit(context.sentencia());
             EntornoActual = EntornoPrevio;
@@ -771,11 +771,11 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string identificador = context.IDENTIFICADOR().GetText();
         //if (PalabrasReservadas.Contains(identificador))
-        //    throw new Exception("Declaración: '" + identificador + "' es una palabra reservada");
+        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         string TipoMatriz = context.TIPO().GetText();
         // Construir la Matriz visitando el contenido
         ValorWrapper Matriz = VisitContenidoMatriz(context.contenido_matriz(), TipoMatriz);
-        EntornoActual.Declarar(identificador, Matriz, context.Start.Line, context.Start.Column);
+        EntornoActual.Declarar(identificador, Matriz, context.Start.Line, context.Start.Column, context.Start);
         return ValorVoid;
     }
 
@@ -820,7 +820,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         {
             ValorWrapper valor = Visit(expresion);
             if (!TipoMatriz.Equals(ObtenerTipo(valor), StringComparison.Ordinal))
-                throw new Exception($"Error de tipo: Se esperaba {TipoMatriz} pero se encontró {ObtenerTipo(valor)}");
+                throw new ErrorSemantico($"Error de tipo: Se esperaba {TipoMatriz} pero se encontró {ObtenerTipo(valor)}", context.Start);
             valores.Add(valor);
         }
         return new ValorSlice(valores, TipoMatriz);
@@ -830,14 +830,14 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitAsignacionMatriz(LanguageParser.AsignacionMatrizContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper MatrizActual = EntornoActual.Obtener(identificador);
+        ValorWrapper MatrizActual = EntornoActual.Obtener(identificador, context.Start);
         ValorWrapper NuevoValor = Visit(context.valornuevo);
         
         if (MatrizActual is not ValorSlice Matriz)
-            throw new Exception("Asignación Matriz: La Variable "+ identificador + "no es una Matriz");
+            throw new ErrorSemantico("Asignación Matriz: La Variable "+ identificador + "no es una Matriz", context.Start);
         
         if (!Matriz.Tipo.Equals(ObtenerTipo(NuevoValor), StringComparison.Ordinal))
-            throw new Exception("Asignación Matriz: Tipo de dato de la matriz "+Matriz.Tipo+" no coincide con el valor "+ObtenerTipo(NuevoValor)+" .");
+            throw new ErrorSemantico("Asignación Matriz: Tipo de dato de la matriz "+Matriz.Tipo+" no coincide con el valor "+ObtenerTipo(NuevoValor)+" .", context.Start);
 
         // Obtener los índices
         List<int> IndicesMatriz = new List<int>();
@@ -845,7 +845,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         {
             ValorWrapper indice = Visit(elemento);
             if (indice is not ValorInt indiceInt)
-                throw new Exception($"Asignación Matriz: Índice '{ObtenerTipo(indice)}' no es un entero.");
+                throw new ErrorSemantico($"Asignación Matriz: Índice '{ObtenerTipo(indice)}' no es un entero.", context.Start);
             IndicesMatriz.Add(indiceInt.Valor);
         }
         if (IndicesMatriz.Count > 0)
@@ -859,7 +859,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             int indice = IndicesMatriz[i];
             // Verificar que el índice está dentro de los límites
             if (indice < 0 || indice >= SubMatrixAuxiliar.Valores.Count)
-                throw new Exception($"Error Asignación: Índice fuera de rango: {indice}. Tamaño de la matriz: {SubMatrixAuxiliar.Valores.Count}");
+                throw new ErrorSemantico($"Error Asignación: Índice fuera de rango: {indice}. Tamaño de la matriz: {SubMatrixAuxiliar.Valores.Count}", context.Start);
             // Avanzar en la matriz
             if (SubMatrixAuxiliar.Valores[indice] is ValorSlice siguienteNivel)
             {
@@ -867,14 +867,14 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             else
             {
-                throw new Exception($"Error Asignación: La posición [{string.Join(", ", IndicesMatriz.Take(i + 1))}] no contiene una submatriz.");
+                throw new ErrorSemantico($"Error Asignación: La posición [{string.Join(", ", IndicesMatriz.Take(i + 1))}] no contiene una submatriz.", context.Start);
             }
         }
         // Asignar el nuevo valor en la última posición
         int ultimoIndice = IndicesMatriz[^1]; // Último índice de la lista
         // Verificar que el índice final esté dentro de los límites
         if (ultimoIndice < 0 || ultimoIndice >= SubMatrixAuxiliar.Valores.Count)
-            throw new Exception($"Error Asignación: Índice fuera de rango en la última dimensión: {ultimoIndice}. Tamaño: {SubMatrixAuxiliar.Valores.Count}");
+            throw new ErrorSemantico($"Error Asignación: Índice fuera de rango en la última dimensión: {ultimoIndice}. Tamaño: {SubMatrixAuxiliar.Valores.Count}", context.Start);
         SubMatrixAuxiliar.Valores[ultimoIndice] = NuevoValor;
         return ValorVoid;
     }
@@ -883,10 +883,10 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitAccesoMatriz(LanguageParser.AccesoMatrizContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper MatrizActual = EntornoActual.Obtener(identificador);
+        ValorWrapper MatrizActual = EntornoActual.Obtener(identificador, context.Start);
 
         if (MatrizActual is not ValorSlice Matriz)
-            throw new Exception("Acceso Matriz: La Variable '" + identificador + "' no es una Matriz.");
+            throw new ErrorSemantico("Acceso Matriz: La Variable '" + identificador + "' no es una Matriz.", context.Start);
         
         // Obtener los índices
         List<int> IndicesMatriz = new List<int>();
@@ -894,7 +894,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         {
             ValorWrapper indice = Visit(elemento);
             if (indice is not ValorInt indiceInt)
-                throw new Exception($"Acceso Matriz: Índice '{ObtenerTipo(indice)}' no es un entero.");
+                throw new ErrorSemantico($"Acceso Matriz: Índice '{ObtenerTipo(indice)}' no es un entero.", context.Start);
             IndicesMatriz.Add(indiceInt.Valor);
         }
 
@@ -906,7 +906,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
             // Verificar que el índice está dentro del rango
             if (indice < 0 || indice >= SubMatriz.Valores.Count)
-                throw new Exception($"Error Acceso: Índice fuera de rango: {indice}. Tamaño del arreglo: {SubMatriz.Valores.Count}");
+                throw new ErrorSemantico($"Error Acceso: Índice fuera de rango: {indice}. Tamaño del arreglo: {SubMatriz.Valores.Count}", context.Start);
 
             // Si es el último índice, retornar el valor
             if (i == IndicesMatriz.Count - 1)
@@ -914,12 +914,12 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
             // Verificar que el siguiente nivel sigue siendo una matriz
             if (SubMatriz.Valores[indice] is not ValorSlice nuevaSubMatriz)
-                throw new Exception($"Error Acceso: Intento de acceso en un nivel inválido. La posición [{string.Join(", ", IndicesMatriz)}] no contiene una matriz.");
+                throw new ErrorSemantico($"Error Acceso: Intento de acceso en un nivel inválido. La posición [{string.Join(", ", IndicesMatriz)}] no contiene una matriz.", context.Start);
             
             SubMatriz = nuevaSubMatriz;
         }
 
-        throw new Exception("Acceso Matriz: No se pudo acceder correctamente a la matriz.");
+        throw new ErrorSemantico("Acceso Matriz: No se pudo acceder correctamente a la matriz.", context.Start);
     }
     // VisitLlamadaFuncion
     public override ValorWrapper VisitLlamadaFuncion(LanguageParser.LlamadaFuncionContext context)
@@ -933,7 +933,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             else
             {
-                throw new Exception("Error de llamada: No se puede llamar a un valor que no es una función.");
+                throw new ErrorSemantico("Error de llamada: No se puede llamar a un valor que no es una función.", context.Start);
             }
         }
         return llamada;
@@ -953,7 +953,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         }
          if (context != null && argumento.Count != Invocable.Aridad())
          {
-             throw new Exception("Error de llamada: Se esperaban " + Invocable.Aridad() + " argumentos, pero se recibieron " + argumento.Count);
+             throw new ErrorSemantico("Error de llamada: Se esperaban " + Invocable.Aridad() + " argumentos, pero se recibieron " + argumento.Count, context.Start);
          }
         return Invocable.Invoke(argumento, this);
     }
@@ -963,7 +963,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         string identificador = context.IDENTIFICADOR().GetText();
         var funcionForranea = new FuncionForanea(EntornoActual, context);
         var valorFuncion = new ValorFuncion(funcionForranea, identificador);
-        EntornoActual.Declarar(identificador, valorFuncion, context.Start.Line, context.Start.Column);
+        EntornoActual.Declarar(identificador, valorFuncion, context.Start.Line, context.Start.Column, context.Start);
 
         if (identificador == "main")
         {
@@ -978,7 +978,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string NombreStruct = context.IDENTIFICADOR().GetText();
         Dictionary<string, string> AtributoStruct = new();
-        EntornoActual.DeclararStruct(NombreStruct, AtributoStruct);
+        EntornoActual.DeclararStruct(NombreStruct, AtributoStruct, context.Start);
         foreach (var Atributo in context.atributos())
         {
             for (int i = 0; i < Atributo.tipo_struct().Length; i++)
@@ -992,11 +992,11 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
                 }
                 if (!EsTipoPrimitivo(TipoAtributo) && !EntornoActual.ExisteStruct(TipoAtributo))
                 {
-                    throw new Exception($"Error: Se intenta usar el struct '{TipoAtributo}', pero no está definido.");
+                    throw new ErrorSemantico($"Error: Se intenta usar el struct '{TipoAtributo}', pero no está definido.", context.Start);
                 }
                 if (AtributoStruct.ContainsKey(NombreAtributo))
                 {
-                    throw new Exception($"Error: El atributo '{NombreAtributo}' ya está definido en el struct '{NombreStruct}'.");
+                    throw new ErrorSemantico($"Error: El atributo '{NombreAtributo}' ya está definido en el struct '{NombreStruct}'.", context.Start);
                 }
 
                 AtributoStruct.Add(NombreAtributo, TipoAtributo);
@@ -1012,9 +1012,9 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
         if (!EntornoActual.ExisteStruct(NombreStruct))
         {
-            throw new Exception($"Error: El struct '{NombreStruct}' no está definido.");
+            throw new ErrorSemantico($"Error: El struct '{NombreStruct}' no está definido.", context.Start);
         }
-        Dictionary<string, string> AtributosStruct = EntornoActual.ObtenerStruct(NombreStruct);
+        Dictionary<string, string> AtributosStruct = EntornoActual.ObtenerStruct(NombreStruct, context.Start);
         Dictionary<string, ValorWrapper> AtributosNuevaInstancia = new();
 
         for (int i = 0; i < context.atributos_instancia().IDENTIFICADOR().Length; i++)
@@ -1024,7 +1024,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
             if (!AtributosStruct.ContainsKey(NombreAtributo))
             {
-                throw new Exception($"Error: El NombreAtributo '{NombreAtributo}' no existe en el struct '{NombreStruct}'.");
+                throw new ErrorSemantico($"Error: El NombreAtributo '{NombreAtributo}' no existe en el struct '{NombreStruct}'.", context.Start);
             }
 
             string TipoAtributoEsperado = AtributosStruct[NombreAtributo];
@@ -1033,12 +1033,12 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             {
                 if (EsTipoPrimitivo(TipoAtributoEsperado))
                 {
-                    throw new Exception($"Error: El Atributo '{NombreAtributo}' de '{NombreStruct}' no puede ser 'nil' porque se esperaba un tipo primitivo '{TipoAtributoEsperado}'.");
+                    throw new ErrorSemantico($"Error: El Atributo '{NombreAtributo}' de '{NombreStruct}' no puede ser 'nil' porque se esperaba un tipo primitivo '{TipoAtributoEsperado}'.", context.Start);
                 }
             }
             else if (!ObtenerTipo(ValorAtributo).Equals(TipoAtributoEsperado))
             {
-                throw new Exception($"Error: El Atributo '{NombreAtributo}' de '{NombreStruct}' esperaba un Atributo de tipo '{TipoAtributoEsperado}', pero se recibió '{ObtenerTipo(ValorAtributo)}'.");
+                throw new ErrorSemantico($"Error: El Atributo '{NombreAtributo}' de '{NombreStruct}' esperaba un Atributo de tipo '{TipoAtributoEsperado}', pero se recibió '{ObtenerTipo(ValorAtributo)}'.", context.Start);
             }
 
             AtributosNuevaInstancia[NombreAtributo] = ValorAtributo;
@@ -1049,7 +1049,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             if (!AtributosNuevaInstancia.ContainsKey(NombreAtributo.Key))
             {
                 string tipo = NombreAtributo.Value;
-                AtributosNuevaInstancia[NombreAtributo.Key] = ObtenerValorPorDefecto(tipo);
+                AtributosNuevaInstancia[NombreAtributo.Key] = ObtenerValorPorDefecto(tipo, context.Start);
             }
         }
 
@@ -1057,7 +1057,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         return NuevaInstancia;
     }
 
-    private ValorWrapper ObtenerValorPorDefecto(string tipo)
+    private ValorWrapper ObtenerValorPorDefecto(string tipo,  Antlr4.Runtime.IToken token)
     {
         if (tipo == "int") return new ValorInt(0);
         if (tipo == "float64") return new ValorFloat64(0);
@@ -1067,18 +1067,18 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         
         if (EntornoActual.ExisteStruct(tipo))
         {
-            Dictionary<string, string> atributosDefinidos = EntornoActual.ObtenerStruct(tipo);
+            Dictionary<string, string> atributosDefinidos = EntornoActual.ObtenerStruct(tipo, token);
             Dictionary<string, ValorWrapper> atributosInicializados = new();
 
             foreach (var atributo in atributosDefinidos)
             {
-                atributosInicializados[atributo.Key] = ObtenerValorPorDefecto(atributo.Value);
+                atributosInicializados[atributo.Key] = ObtenerValorPorDefecto(atributo.Value, token);
             }
 
             return new ValorStruct(atributosInicializados, tipo);
         }
 
-        throw new Exception($"Error: Tipo '{tipo}' desconocido.");
+        throw new ErrorSemantico($"Error: Tipo '{tipo}' desconocido.", token);
     }
 
     //VisitAccesoStruct
@@ -1086,7 +1086,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     {
         string NombreInstancia = context.IDENTIFICADOR(0).GetText();
         
-        ValorWrapper InstanciaActual = EntornoActual.Obtener(NombreInstancia);
+        ValorWrapper InstanciaActual = EntornoActual.Obtener(NombreInstancia, context.Start);
         
         for (int i = 1; i < context.IDENTIFICADOR().Length; i++)
         {
@@ -1098,7 +1098,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             else
             {
-                throw new Exception($"Error: '{NombreInstancia}' no es una ArregloActual válida para acceder a '{atributo}'.");
+                throw new ErrorSemantico($"Error: '{NombreInstancia}' no es una ArregloActual válida para acceder a '{atributo}'.", context.Start);
             }
         }
         return InstanciaActual;
@@ -1108,7 +1108,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitAsignacionAtributoInstancia(LanguageParser.AsignacionAtributoInstanciaContext context)
     {
         string NombreInstancia = context.IDENTIFICADOR(0).GetText();
-        ValorWrapper InstanciaActual = EntornoActual.Obtener(NombreInstancia);
+        ValorWrapper InstanciaActual = EntornoActual.Obtener(NombreInstancia, context.Start);
         ValorWrapper NuevoValor = Visit(context.expresion());
 
         // Recorrer los atributos anidados
@@ -1122,7 +1122,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
             }
             else
             {
-                throw new Exception($"Error: '{NombreInstancia}' no es una ArregloActual válida para acceder a '{atributo}'.");
+                throw new ErrorSemantico($"Error: '{NombreInstancia}' no es una ArregloActual válida para acceder a '{atributo}'.", context.Start);
             }
         }
 
@@ -1135,10 +1135,10 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
             if (ValorExistente is ValorNil)
             {
-                var DefinicionStruct = EntornoActual.ObtenerStruct(InstanciaModificable.NombreStruct);
+                var DefinicionStruct = EntornoActual.ObtenerStruct(InstanciaModificable.NombreStruct, context.Start);
                 if (!DefinicionStruct.TryGetValue(AtributoFinal, out string? tipoEsperadoNullable) || tipoEsperadoNullable == null)
                 {
-                    throw new Exception($"Error: El atributo '{AtributoFinal}' no existe en la definición del struct '{InstanciaModificable.NombreStruct}'.");
+                    throw new ErrorSemantico($"Error: El atributo '{AtributoFinal}' no existe en la definición del struct '{InstanciaModificable.NombreStruct}'.", context.Start);
                 }
                 TipoEsperado = tipoEsperadoNullable;
             }
@@ -1150,7 +1150,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
             if (!ObtenerTipo(NuevoValor).Equals(TipoEsperado, StringComparison.Ordinal))
             {
-                throw new Exception($"Error: No se puede asignar un valor de tipo '{ObtenerTipo(NuevoValor)}' al atributo '{AtributoFinal}' de tipo '{TipoEsperado}'.");
+                throw new ErrorSemantico($"Error: No se puede asignar un valor de tipo '{ObtenerTipo(NuevoValor)}' al atributo '{AtributoFinal}' de tipo '{TipoEsperado}'.", context.Start);
             }
 
             // Asignar nuevo valor
@@ -1164,50 +1164,50 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitIncremento(LanguageParser.IncrementoContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper variable = EntornoActual.Obtener(identificador);
+        ValorWrapper variable = EntornoActual.Obtener(identificador, context.Start);
 
         if (variable is ValorInt)
         {
             ValorInt valor = (ValorInt)variable;
             ValorInt nuevoValor = new(valor.Valor + 1);
-            EntornoActual.Asignar(identificador, nuevoValor);
+            EntornoActual.Asignar(identificador, nuevoValor, context.Start);
             return nuevoValor;
         }
         else if (variable is ValorFloat64)
         {
             ValorFloat64 valor = (ValorFloat64)variable;
             ValorFloat64 nuevoValor = new(valor.Valor + 1);
-            EntornoActual.Asignar(identificador, nuevoValor);
+            EntornoActual.Asignar(identificador, nuevoValor, context.Start);
             return nuevoValor;
         }
         else
         {
-            throw new Exception("Incremento: Tipo de Dato: " + ObtenerTipo(variable) + " No es un Entero o Float64");
+            throw new ErrorSemantico("Incremento: Tipo de Dato: " + ObtenerTipo(variable) + " No es un Entero o Float64", context.Start);
         }
     }
     // VisitDecremento
     public override ValorWrapper VisitDecremento(LanguageParser.DecrementoContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        ValorWrapper variable = EntornoActual.Obtener(identificador);
+        ValorWrapper variable = EntornoActual.Obtener(identificador, context.Start);
 
         if (variable is ValorInt)
         {
             ValorInt valor = (ValorInt)variable;
             ValorInt nuevoValor = new(valor.Valor - 1);
-            EntornoActual.Asignar(identificador, nuevoValor);
+            EntornoActual.Asignar(identificador, nuevoValor, context.Start);
             return nuevoValor;
         }
         else if (variable is ValorFloat64)
         {
             ValorFloat64 valor = (ValorFloat64)variable;
             ValorFloat64 nuevoValor = new(valor.Valor - 1);
-            EntornoActual.Asignar(identificador, nuevoValor);
+            EntornoActual.Asignar(identificador, nuevoValor, context.Start);
             return nuevoValor;
         }
         else
         {
-            throw new Exception("Decremento: Tipo de Dato: " + ObtenerTipo(variable) + " No es un Entero o Float64");
+            throw new ErrorSemantico("Decremento: Tipo de Dato: " + ObtenerTipo(variable) + " No es un Entero o Float64", context.Start);
         }
     }
 

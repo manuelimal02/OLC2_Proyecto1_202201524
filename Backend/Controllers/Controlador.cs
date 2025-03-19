@@ -12,7 +12,8 @@ namespace Backend.Controllers
     {
         private readonly ILogger<Controlador> _logger;
 
-        private static string UltimoReporteHtml = "";
+        private static string UltimoReporteTabla = "";
+        private static string UltimoReporteErrores = "";
 
         public Controlador(ILogger<Controlador> logger)
         {
@@ -46,6 +47,7 @@ namespace Backend.Controllers
             Parser.AddErrorListener(new ErrorSintactico());
 
             Entorno.TablaGlobalSimbolos.Clear();
+            Error.TablaGlobalErrores.Clear();
 
             try
             {
@@ -53,20 +55,23 @@ namespace Backend.Controllers
                 var PatronVisitor = new InterpreteVisitor();
                 PatronVisitor.Visit(ArbolSintactico);
 
-                UltimoReporteHtml = PatronVisitor.EntornoActual.ExportarTablaHtml();
+                UltimoReporteTabla = PatronVisitor.EntornoActual.ExportarTablaHtml();
 
                 return Ok(new { result = PatronVisitor.Salida });
             }
             catch (ParseCanceledException ex)
             {
+               UltimoReporteErrores = new Error().ExportarTablaErrores();
                 return BadRequest(new { error = ex.Message });
             }
             catch (ErrorSemantico ex)
             {
+                UltimoReporteErrores = new Error().ExportarTablaErrores();
                 return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
+                UltimoReporteErrores = new Error().ExportarTablaErrores();
                 return BadRequest(new { error = ex.Message });
             }
         }
@@ -74,12 +79,24 @@ namespace Backend.Controllers
         [HttpGet("DescargarReporteTabla")]
         public IActionResult DescargarReporteHtml()
         {
-            if (string.IsNullOrEmpty(UltimoReporteHtml))
+            if (string.IsNullOrEmpty(UltimoReporteTabla))
             {
                 return BadRequest(new { error = "No hay un reporte disponible. Compila primero." });
             }
             string NombreArchivo = "TablaSimbolos.html";
-            byte[] NombreEnBytes = System.Text.Encoding.UTF8.GetBytes(UltimoReporteHtml);
+            byte[] NombreEnBytes = System.Text.Encoding.UTF8.GetBytes(UltimoReporteTabla);
+            return File(NombreEnBytes, "text/html", NombreArchivo);
+        }
+
+        [HttpGet("DescargarReporteErrores")]
+        public IActionResult DescargarReporteErrores()
+        {
+            if (string.IsNullOrEmpty(UltimoReporteErrores))
+            {
+                return BadRequest(new { error = "No hay un reporte disponible. Compila primero." });
+            }
+            string NombreArchivo = "TablaErrores.html";
+            byte[] NombreEnBytes = System.Text.Encoding.UTF8.GetBytes(UltimoReporteErrores);
             return File(NombreEnBytes, "text/html", NombreArchivo);
         }
 

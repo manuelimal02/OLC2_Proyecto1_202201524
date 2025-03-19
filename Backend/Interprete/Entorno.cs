@@ -126,22 +126,22 @@ public class Entorno
         return TablaSb.ToString();
     }
     //---------------------------------------------------------------------------------------------------------------------
-    public ValorWrapper Obtener(string identificador)
+    public ValorWrapper Obtener(string identificador, Antlr4.Runtime.IToken token)
     {
         if (Simbolo.ContainsKey(identificador)){
             return Simbolo[identificador];
         }
 
         if (EntornoPadre != null){
-            return EntornoPadre.Obtener(identificador);
+            return EntornoPadre.Obtener(identificador, token);
         }
-        throw new Exception("Simbolo: " + identificador + " No Encontrado");
+        throw new ErrorSemantico("Simbolo: " + identificador + " No Encontrado", token);
       
     }
-    public void Declarar(string identificador, ValorWrapper valor, int linea, int columna)
+    public void Declarar(string identificador, ValorWrapper valor, int linea, int columna, Antlr4.Runtime.IToken token)
     {
         if (Simbolo.ContainsKey(identificador)){
-            throw new Exception("Simbolo: " + identificador + " Ya Existe");
+            throw new ErrorSemantico("Simbolo: " + identificador + " Ya Existe", token);
         } else {
             Simbolo.Add(identificador, valor);
             TablaGlobalSimbolos.Add(new FilaTablaSimbolos
@@ -155,26 +155,26 @@ public class Entorno
             });
         }
     }
-    public ValorWrapper Asignar (string identificador, ValorWrapper valor)
+    public ValorWrapper Asignar (string identificador, ValorWrapper valor, Antlr4.Runtime.IToken token)
     {
         if (Simbolo.ContainsKey(identificador)){
             Simbolo[identificador] = valor;
             return valor;
         } 
         if (EntornoPadre != null){
-            return EntornoPadre.Asignar(identificador, valor);
+            return EntornoPadre.Asignar(identificador, valor, token);
         }
-        throw new Exception("Simbolo: " + identificador + " No Encontrado.");
+        throw new ErrorSemantico("Simbolo: " + identificador + " No Encontrado.", token);
     }
-    public void DeclararStruct(string nombre, Dictionary<string, string> atributos)
+    public void DeclararStruct(string nombre, Dictionary<string, string> atributos, Antlr4.Runtime.IToken token)
     {
         if (Struct.ContainsKey(nombre))
         {
-            throw new Exception($"Error: El struct '{nombre}' ya está definido.");
+            throw new ErrorSemantico($"Error: El struct '{nombre}' ya está definido.", token);
         }
         Struct[nombre] = atributos;
     }
-    public Dictionary<string, string> ObtenerStruct(string nombre)
+    public Dictionary<string, string> ObtenerStruct(string nombre, Antlr4.Runtime.IToken token)
     {
         if (Struct.ContainsKey(nombre))
         {
@@ -182,9 +182,9 @@ public class Entorno
         }
         if (EntornoPadre != null)
         {
-            return EntornoPadre.ObtenerStruct(nombre);
+            return EntornoPadre.ObtenerStruct(nombre, token);
         }
-        throw new Exception($"Error: El struct '{nombre}' no está definido.");
+        throw new ErrorSemantico($"Error: El struct '{nombre}' no está definido.", token);
     }
     public bool ExisteStruct(string nombre)
     {

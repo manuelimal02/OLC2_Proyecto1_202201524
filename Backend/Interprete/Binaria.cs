@@ -1,16 +1,16 @@
-using System.Security.Cryptography.X509Certificates;
-
 public class Binaria
 {
     private ValorWrapper Derecha;
     private ValorWrapper Izquierda;
     private string Operador;
+    private Antlr4.Runtime.IToken LineaColumna;
 
-    public Binaria(ValorWrapper izquierda, ValorWrapper derecha, string operador)
+    public Binaria(ValorWrapper izquierda, ValorWrapper derecha, string operador, Antlr4.Runtime.IToken LineaColumna)
     {
         Izquierda = izquierda;
         Derecha = derecha;
         Operador = operador;
+        this.LineaColumna = LineaColumna;
     }
     
     public ValorWrapper RealizarOperacion() 
@@ -44,7 +44,7 @@ public class Binaria
             case "||":
                 return OperacionOr();
             default:
-                throw new Exception("Operador: " + Operador + " No Encontrado");
+                throw new ErrorSemantico("Operador: " + Operador + " No Encontrado", this.LineaColumna);
         }
     }
 
@@ -65,7 +65,7 @@ public class Binaria
         if (Izquierda is ValorFloat64 izqFloat2 && Derecha is ValorInt derInt2)
             return new ValorFloat64(izqFloat2.Valor + derInt2.Valor);
         
-        throw new Exception("Tipos de datos no soportados para la operación +");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación +", this.LineaColumna);
     }
 
     public ValorWrapper Resta(){
@@ -81,7 +81,7 @@ public class Binaria
         // float64 - int = float64
         if (Izquierda is ValorFloat64 izqFloat2 && Derecha is ValorInt derInt2)
             return new ValorFloat64(izqFloat2.Valor - derInt2.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación -");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación -", this.LineaColumna);
     }
 
     public ValorWrapper Multiplicacion(){
@@ -97,13 +97,13 @@ public class Binaria
         // float64 * int = float64
         if (Izquierda is ValorFloat64 izqFloat2 && Derecha is ValorInt derInt2)
             return new ValorFloat64(izqFloat2.Valor * derInt2.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación *");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación *", this.LineaColumna);
     }
 
     public ValorWrapper Division(){
         // Division por 0
         if (Derecha is ValorInt derInt1 && derInt1.Valor == 0)
-            throw new Exception("Division por 0");
+            throw new ErrorSemantico("Division por 0", this.LineaColumna);
         // int / int = int
         if (Izquierda is ValorInt izqInt && Derecha is ValorInt derInt3)
             return new ValorInt(izqInt.Valor / derInt3.Valor);
@@ -116,17 +116,17 @@ public class Binaria
         // float64 / int = float64
         if (Izquierda is ValorFloat64 izqFloat2 && Derecha is ValorInt derInt2)
             return new ValorFloat64(izqFloat2.Valor / derInt2.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación /");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación /", this.LineaColumna);
     }
 
     public ValorWrapper Modulo(){
         // Modulo por 0
         if (Derecha is ValorInt derInt1 && derInt1.Valor == 0)
-            throw new Exception("Modulo por 0");
+            throw new ErrorSemantico("Modulo por 0", this.LineaColumna);
         // int % int = int
         if (Izquierda is ValorInt izqInt && Derecha is ValorInt derInt)
             return new ValorInt(izqInt.Valor % derInt.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación %");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación %", this.LineaColumna);
     }
 
     public ValorWrapper Igualdad(){
@@ -155,7 +155,7 @@ public class Binaria
         if (Izquierda is ValorNil && Derecha is ValorNil)
             return new ValorBoolean(true);
             
-        throw new Exception("Tipos de datos no soportados para la operación ==");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación ==", this.LineaColumna);
     }
 
     public ValorWrapper Desigualdad(){
@@ -180,7 +180,7 @@ public class Binaria
         // float64 != int = bool
         if (Izquierda is ValorFloat64 izqFloat2 && Derecha is ValorInt derInt2)
             return new ValorBoolean(izqFloat2.Valor != derInt2.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación !=");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación !=", this.LineaColumna);
     }
 
     public ValorWrapper Mayor(){
@@ -199,7 +199,7 @@ public class Binaria
         // rune > rune = bool
         if (Izquierda is ValorRune izqRune && Derecha is ValorRune derRune)
             return new ValorBoolean(izqRune.Valor > derRune.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación >");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación >", this.LineaColumna);
     }
 
     public ValorWrapper Menor(){
@@ -218,7 +218,7 @@ public class Binaria
         // rune < rune = bool
         if (Izquierda is ValorRune izqRune && Derecha is ValorRune derRune)
             return new ValorBoolean(izqRune.Valor < derRune.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación <");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación <", this.LineaColumna);
     }
 
     public ValorWrapper MayorIgual(){
@@ -237,7 +237,7 @@ public class Binaria
         // rune >= rune = bool
         if (Izquierda is ValorRune izqRune && Derecha is ValorRune derRune)
             return new ValorBoolean(izqRune.Valor >= derRune.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación >=");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación >=", this.LineaColumna);
     }
     public ValorWrapper MenorIgual(){
         // int <= int = bool
@@ -255,20 +255,20 @@ public class Binaria
         // rune <= rune = bool
         if (Izquierda is ValorRune izqRune && Derecha is ValorRune derRune)
             return new ValorBoolean(izqRune.Valor <= derRune.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación <=");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación <=", this.LineaColumna);
     }
 
     public ValorWrapper OperacionAnd(){
         // bool && bool = bool
         if (Izquierda is ValorBoolean izqBool && Derecha is ValorBoolean derBool)
             return new ValorBoolean(izqBool.Valor && derBool.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación &&");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación &&", this.LineaColumna);
     }
 
     public ValorWrapper OperacionOr(){
         // bool || bool = bool
         if (Izquierda is ValorBoolean izqBool && Derecha is ValorBoolean derBool)
             return new ValorBoolean(izqBool.Valor || derBool.Valor);
-        throw new Exception("Tipos de datos no soportados para la operación ||");
+        throw new ErrorSemantico("Tipos de datos no soportados para la operación ||", this.LineaColumna);
     }
 }

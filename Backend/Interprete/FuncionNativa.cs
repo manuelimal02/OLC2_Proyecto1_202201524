@@ -8,12 +8,15 @@ public class FuncionForanea : Invocable
     private string TipoRetornoEsperado;
     private string NombreFuncion;
 
+    private Antlr4.Runtime.IToken token;
+
     public FuncionForanea(Entorno clousure, LanguageParser.DeclaracionFuncionContext context)
     {
         Clousure = clousure;
         this.context = context;
         this.TipoRetornoEsperado = context.TIPO()?.GetText() ?? "void"; 
         this.NombreFuncion = context.IDENTIFICADOR().GetText();
+        this.token = context.Start;  
     }
     public int Aridad()
     {
@@ -38,15 +41,15 @@ public class FuncionForanea : Invocable
                 string TipoParametro = context.parametros().tipo_funcion(i).GetText();
                 if (!ParametrosDeclarados.Add(NombreParametro))
                 {
-                    throw new Exception($"Error de declaración: El nombre del parámetro '{NombreParametro}' ya existe.");
+                    throw new ErrorSemantico($"Error de declaración: El nombre del parámetro '{NombreParametro}' ya existe.", this.token);
                 }
                 if (!ObtenerTipo(argumentos[i]).Equals(TipoParametro))
                 {
-                    throw new Exception($"Se esperaba el tipo '{TipoParametro}' en el parametro '{NombreParametro}' pero se recibió: '{ObtenerTipo(argumentos[i])}'");
+                    throw new ErrorSemantico($"Se esperaba el tipo '{TipoParametro}' en el parametro '{NombreParametro}' pero se recibió: '{ObtenerTipo(argumentos[i])}'",this.token);
                 }
                 else
                 {
-                    NuevoEntorno.Declarar(NombreParametro, argumentos[i],0,0);
+                    NuevoEntorno.Declarar(NombreParametro, argumentos[i],0,0, this.token);
                 }
             }
         }
@@ -63,7 +66,7 @@ public class FuncionForanea : Invocable
 
                 if (!ObtenerTipo(VarRetorno.Valor).Equals(TipoRetornoEsperado))
                 {
-                    throw new Exception($"Error de retorno: La función '{NombreFuncion}' esperaba '{TipoRetornoEsperado}', pero se retornó '{ObtenerTipo(VarRetorno.Valor)}'.");
+                    throw new ErrorSemantico($"Error de retorno: La función '{NombreFuncion}' esperaba '{TipoRetornoEsperado}', pero se retornó '{ObtenerTipo(VarRetorno.Valor)}'.", this.token);
                 }
                 return VarRetorno.Valor;
         }
