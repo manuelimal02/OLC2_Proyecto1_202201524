@@ -4,6 +4,8 @@ using Antlr4.Runtime;
 using Analizador;
 using System.Diagnostics;
 using Antlr4.Runtime.Misc;
+using System.Text.Json;
+using System.Text;
 
 namespace Backend.Controllers
 {
@@ -81,7 +83,7 @@ namespace Backend.Controllers
         {
             if (string.IsNullOrEmpty(UltimoReporteTabla))
             {
-                return BadRequest(new { error = "No hay un reporte disponible. Compila primero." });
+                return BadRequest(new { error = "No hay un reporte disponible." });
             }
             string NombreArchivo = "TablaSimbolos.html";
             byte[] NombreEnBytes = System.Text.Encoding.UTF8.GetBytes(UltimoReporteTabla);
@@ -93,12 +95,69 @@ namespace Backend.Controllers
         {
             if (string.IsNullOrEmpty(UltimoReporteErrores))
             {
-                return BadRequest(new { error = "No hay un reporte disponible. Compila primero." });
+                return BadRequest(new { error = "No hay un reporte disponible" });
             }
             string NombreArchivo = "TablaErrores.html";
             byte[] NombreEnBytes = System.Text.Encoding.UTF8.GetBytes(UltimoReporteErrores);
             return File(NombreEnBytes, "text/html", NombreArchivo);
         }
+        
+        [HttpPost("DescargarReporteAST")]
+        public async Task<IActionResult> DescargarReporteAST ([FromBody] CompileRequest request)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { error = "Petición Incorrecta" });
+            }
+            string grammarPath = Path.Combine(Directory.GetCurrentDirectory(), "./Gramatica/Language.g4");
+            var grammar ="";
+            try
+            {
+                if (System.IO.File.Exists(grammarPath)){
+                    grammar = await System.IO.File.ReadAllTextAsync(grammarPath);
+                } else {
+                    return BadRequest(new { error = "No se encontro el archivo de gramatica" });
+                }
+               
+            }
+            catch (System.Exception)
+            {
+                return BadRequest(new { error = "Error al leer el archivo de gramatica" });
+            }
+            
+            var payload = new { 
+                grammar,
+                lexgrammar = "",
+                input = request.code,
+                start = "program" 
+            };
 
+            var JsonPayLoad = JsonSerializer.Serialize(payload);
+            var context = new StringContent(JsonPayLoad, Encoding.UTF8, "application/json");
+            using (var client = new HttpClient())
+            {
+                try
+                {
+                    HttpResponseMessage response = await client.PostAsync("http://lab.antlr.org/parse/", context);
+                    response.EnsureSuccessStatusCode();
+
+                    string result = await response.Content.ReadAsStringAsync();
+
+                    using var doc = JsonDocument.Parse(result);
+                    var root = doc.RootElement;
+
+                    if (root.TryGetProperty("result", out JsonElement resultElement) && resultElement.TryGetProperty("svgtree", out JsonElement svgTreeElement))
+                    {
+                        string svgtree = svgTreeElement.GetString() ?? string.Empty;
+                        return Content(svgtree, "image/svg+xml");
+                    }
+                    return BadRequest(new { error = "Error al obtener el reporte AST SVG" });
+                }
+                catch (System.Exception)
+                {
+                    return BadRequest(new { error = "Error al obtener el reporte AST" });
+                }
+            }
+        }
     }
 }

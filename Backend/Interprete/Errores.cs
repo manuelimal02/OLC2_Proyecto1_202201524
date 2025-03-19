@@ -35,7 +35,7 @@ public class Error
 
         sb.AppendLine("</table>");
 
-        sb.AppendLine("<div class='footer'>Desarrollado por: Tu Nombre</div>");
+        sb.AppendLine("<div class='footer'>Carlos Manuel Lima Y Lima</div>");
         sb.AppendLine("</body></html>");
 
         return sb.ToString();
@@ -65,7 +65,7 @@ public class ErrorSemantico : Exception
                 Columna = LineaColumna.Column,
                 Tipo = "Semántico"
             });
-            return $"{MensajeError} En línea: {LineaColumna.Line}, Columna: {LineaColumna.Column}";
+            return $"Semantico: {MensajeError} En línea: {LineaColumna.Line}, Columna: {LineaColumna.Column}";
         }
     }
 }

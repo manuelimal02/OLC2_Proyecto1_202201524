@@ -47,7 +47,7 @@ function App() {
       alert("Error al descargar la tabla de símbolos.");
     }
   };
-
+  
   const handleDownloadTablaErrores = async () => {
     try {
       const response = await fetch("http://localhost:5077/Controlador/DescargarReporteErrores");
@@ -67,6 +67,34 @@ function App() {
       document.body.removeChild(a);
     } catch (error) {
       alert("Error al descargar la tabla de errores.");
+    }
+  };
+
+  const handleDownloadReporteAST = async () => {
+    try {
+      const response = await fetch("http://localhost:5077/Controlador/DescargarReporteAST", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ code: Entrada })
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        setSalida(`Error Al Descargar El Reporte AST: ${errorData?.error}`);
+        return;
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "ReporteAST.svg";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (error) {
+      alert("Error al descargar el reporte AST.");
     }
   };
 
@@ -92,7 +120,7 @@ function App() {
             <div className="dropdown-content">
               <button id="TablaErrores" onClick={handleDownloadTablaErrores}>Tabla De Errores</button>
               <button id="TablaSimbolos" onClick={handleDownloadTablaSimbolos}>Tabla De Símbolos</button>
-              <button id="ReporteAST">Reporte de AST</button>
+              <button id="ReporteAST" onClick={handleDownloadReporteAST}>Reporte De AST</button>
             </div>
           </div>
 
