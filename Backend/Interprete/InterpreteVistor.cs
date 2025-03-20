@@ -1,4 +1,4 @@
-
+using static ManejoValorWrappper;
 using Analizador;
 using System.Globalization;
 
@@ -9,50 +9,11 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         "if", "else", "while", "for", "return", "class", "public", "private", "static", "void", 
     };
 
-
     public string Salida = "";
     public Entorno EntornoActual = new Entorno(null);
     private ValorWrapper ValorVoid = new ValorVoid();
 
     private ValorFuncion? MainFunction = null;
-    public string ObtenerValor(ValorWrapper valor)
-    {
-        return valor switch
-        {
-            ValorInt v => v.Valor.ToString(),
-            ValorFloat64 v => v.Valor.ToString("0.0", CultureInfo.InvariantCulture),
-            ValorString v => v.Valor,
-            ValorBoolean v => v.Valor.ToString(),
-            ValorRune v => v.Valor.ToString(),
-            ValorVoid _ => "void",
-            ValorNil _ => "nil",
-            _ => throw new ArgumentException("Obtener Valor: Tipo de valor no soportado")
-        };
-    }
-
-    private string ObtenerTipo(ValorWrapper valor)
-    {
-        return valor switch
-        {
-            ValorInt _ => "int",
-            ValorFloat64 _ => "float64",
-            ValorString _ => "string",
-            ValorBoolean _ => "bool",
-            ValorRune _ => "rune",
-            ValorVoid _ => "void",
-            ValorNil _ => "nil",
-            ValorFuncion _ => "funcion",
-            ValorSlice Slice => Slice.Tipo,
-            ValorStruct Struct => Struct.NombreStruct, 
-            _ => throw new ArgumentException("Obtener Tipo: Tipo de valor no soportado")
-        };
-    }
-
-    private bool EsTipoPrimitivo(string tipo)
-    {
-        return tipo == "int" || tipo == "float64" || tipo == "string" || tipo == "bool" || tipo == "rune";
-    }
-
 
     // VisitProgram
     public override ValorWrapper VisitProgram(LanguageParser.ProgramContext context)
@@ -147,8 +108,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitDeclaracionExplicita(LanguageParser.DeclaracionExplicitaContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        //if (PalabrasReservadas.Contains(identificador))
-        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         ValorWrapper expresion = Visit(context.expresion());
         string tipo = context.TIPO().GetText();
         if (expresion is ValorInt && tipo == "float64"){
@@ -166,8 +125,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitDeclaracionImplicita(LanguageParser.DeclaracionImplicitaContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        //if (PalabrasReservadas.Contains(identificador))
-        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         ValorWrapper expresion = Visit(context.expresion());
         EntornoActual.Declarar(identificador, expresion, context.Start.Line, context.Start.Column, context.Start);
         return ValorVoid;
@@ -176,8 +133,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitDeclaracionPorDefecto(LanguageParser.DeclaracionPorDefectoContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        //if (PalabrasReservadas.Contains(identificador))
-        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         string tipo = context.TIPO().GetText();
         switch (tipo){
             case "int":
@@ -229,38 +184,11 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
         foreach (var expre in context.expresion())
         {
             ValorWrapper expresion = Visit(expre);
-            ValoresSalida.Add(ObtenerRepresentacion(expresion));
+            ValoresSalida.Add(ObtenerValor(expresion));
         }
 
         Salida += string.Join(" ", ValoresSalida) + "\n";
         return ValorVoid;
-    }
-
-    private string ObtenerRepresentacion(ValorWrapper valor)
-    {
-        if (valor is ValorSlice Arreglo)
-        {
-            return "[" + string.Join(", ", Arreglo.Valores.Select(ObtenerRepresentacion)) + "]";
-        }
-        if (valor is ValorStruct Struct)
-        {
-            return ObtenerRepresentacionStruct(Struct);
-        }
-        return ObtenerValor(valor);
-    }
-
-    private string ObtenerRepresentacionStruct(ValorStruct StructValorAuxiliar)
-    {
-        List<string> atributos = new List<string>();
-
-        foreach (var NombreAtributo in StructValorAuxiliar.Atributos)
-        {
-            string nombre = NombreAtributo.Key;
-            string valor = ObtenerRepresentacion(NombreAtributo.Value);
-            atributos.Add($"{nombre}: {valor}");
-        }
-
-        return $"{StructValorAuxiliar.NombreStruct}{{ {string.Join(", ", atributos)} }}";
     }
 
     // VisitFuncionEmbebidaAtoi
@@ -436,8 +364,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitDeclaracionArregloExplicita(LanguageParser.DeclaracionArregloExplicitaContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        //if (PalabrasReservadas.Contains(identificador))
-        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         ValorWrapper NuevoArreglo = Visit(context.expresion());
         EntornoActual.Declarar(identificador, NuevoArreglo, context.Start.Line, context.Start.Column, context.Start);
         return ValorVoid;
@@ -446,8 +372,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitDeclaracionArregloPorDefecto(LanguageParser.DeclaracionArregloPorDefectoContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        //if (PalabrasReservadas.Contains(identificador))
-        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         string TipoArreglo = context.TIPO().GetText();
         List<ValorWrapper> ArregloAuxiliar = new List<ValorWrapper>();
         ValorWrapper NuevoArreglo = new ValorSlice(ArregloAuxiliar, TipoArreglo);
@@ -770,10 +694,8 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     public override ValorWrapper VisitDeclaracionMatrizExplicita(LanguageParser.DeclaracionMatrizExplicitaContext context)
     {
         string identificador = context.IDENTIFICADOR().GetText();
-        //if (PalabrasReservadas.Contains(identificador))
-        //    throw new ErrorSemantico("Declaración: '" + identificador + "' es una palabra reservada");
         string TipoMatriz = context.TIPO().GetText();
-        // Construir la Matriz visitando el contenido
+        // Construir La Matriz
         ValorWrapper Matriz = VisitContenidoMatriz(context.contenido_matriz(), TipoMatriz);
         EntornoActual.Declarar(identificador, Matriz, context.Start.Line, context.Start.Column, context.Start);
         return ValorVoid;
@@ -942,7 +864,6 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
     // VisitCallAuxiliar
     public ValorWrapper VisitCallAuxiliar(Invocable Invocable, LanguageParser.ArgumentoContext context)
     {
-
         List<ValorWrapper> argumento = new List<ValorWrapper>();
         if (context != null)
         {
@@ -990,7 +911,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
                     AtributoStruct.Add(NombreAtributo, TipoAtributo);
                     continue;
                 }
-                if (!EsTipoPrimitivo(TipoAtributo) && !EntornoActual.ExisteStruct(TipoAtributo))
+                if (!VerificarTipoPrimitivo(TipoAtributo) && !EntornoActual.ExisteStruct(TipoAtributo))
                 {
                     throw new ErrorSemantico($"Error: Se intenta usar el struct '{TipoAtributo}', pero no está definido.", context.Start);
                 }
@@ -1031,7 +952,7 @@ public class InterpreteVisitor : LanguageBaseVisitor<ValorWrapper>
 
             if (ValorAtributo is ValorNil)
             {
-                if (EsTipoPrimitivo(TipoAtributoEsperado))
+                if (VerificarTipoPrimitivo(TipoAtributoEsperado))
                 {
                     throw new ErrorSemantico($"Error: El Atributo '{NombreAtributo}' de '{NombreStruct}' no puede ser 'nil' porque se esperaba un tipo primitivo '{TipoAtributoEsperado}'.", context.Start);
                 }
