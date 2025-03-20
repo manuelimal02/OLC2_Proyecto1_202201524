@@ -24,7 +24,6 @@ function App() {
     }
   };
   
-
   const handleAbrirArchivo = () => {
     const input = document.createElement('input');
     input.type = 'file';
