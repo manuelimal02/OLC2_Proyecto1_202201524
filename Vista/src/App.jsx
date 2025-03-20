@@ -2,10 +2,58 @@ import { useState } from 'react';
 import './App.css';
 import { Editor } from "@monaco-editor/react";
 
-
 function App() {
   const [Entrada, setEntrada] = useState('');
   const [Salida, setSalida] = useState('');
+  const [archivoActual, setArchivoActual] = useState(null);
+
+  const handleCrearArchivo = () => {
+    if (window.confirm("¿Deseas crear un archivo nuevo? Se perderán los cambios no guardados.")) {
+      setEntrada('');
+      setSalida('');
+      setArchivoActual(null);
+      const blob = new Blob([''], { type: 'text/plain;charset=utf-8' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'NuevoArchivo.glt';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    }
+  };
+  
+
+  const handleAbrirArchivo = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.glt';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          setEntrada(e.target.result);
+          setArchivoActual(file.name);
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
+  const handleGuardarArchivo = () => {
+    const blob = new Blob([Entrada], { type: 'text/plain;charset=utf-8' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = archivoActual || 'Archivo.glt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
 
   const handleExecute = () => {
     setSalida('');
@@ -102,16 +150,16 @@ function App() {
     <div className="container">
       <div className="navbar">
         <div className="title">
-          <h1>GoLight - Proyecto 1</h1>
+        <h1>GoLight - Proyecto 1 {archivoActual ? `| ${archivoActual}` : '| Sin Archivo'}</h1>
         </div>
         
         <div className="nav-section">
           <div className="nav-item">
             <h2>Archivo</h2>
             <div className="dropdown-content">
-              <button id="AbrirArchivo">Abrir Archivo</button>
-              <button id="CrearArchivo">Crear Archivo</button>
-              <button id="GuardarArchivo">Guardar Archivo</button>
+              <button id="AbrirArchivo" onClick={handleAbrirArchivo}>Abrir Archivo</button>
+              <button id="CrearArchivo" onClick={handleCrearArchivo}>Crear Archivo</button>
+              <button id="GuardarArchivo" onClick={handleGuardarArchivo}>Guardar Archivo</button>
             </div>
           </div>
 
