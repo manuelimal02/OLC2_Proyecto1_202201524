@@ -6,6 +6,19 @@ public class Error
 {
     public static List<FilaTablaErrores> TablaGlobalErrores = new();
 
+    public static void AgregarErrores(string Descripcion, int Linea, int Columna, string Tipo)
+    {
+        TablaGlobalErrores.Add(new FilaTablaErrores
+        {
+            No = TablaGlobalErrores.Count + 1,
+            Descripcion = Descripcion,
+            Linea = Linea,
+            Columna = Columna,
+            Tipo = Tipo
+        }); 
+
+    }
+
     public string ExportarTablaErrores()
     {
         var sb = new StringBuilder();
@@ -22,24 +35,19 @@ public class Error
         sb.AppendLine(".footer { margin-top: 20px; text-align: right; font-style: italic; }");
         sb.AppendLine("</style>");
         sb.AppendLine("</head><body>");
-
         sb.AppendLine("<h2>Tabla de Errores</h2>");
-
         sb.AppendLine("<table>");
         sb.AppendLine("<tr><th>No</th><th>Descripción</th><th>Línea</th><th>Columna</th><th>Tipo</th></tr>");
-
         foreach (var error in TablaGlobalErrores)
         {
             sb.AppendLine($"<tr><td>{error.No}</td><td>{error.Descripcion}</td><td>{error.Linea}</td><td>{error.Columna}</td><td>{error.Tipo}</td></tr>");
         }
-
         sb.AppendLine("</table>");
-
         sb.AppendLine("<div class='footer'>Carlos Manuel Lima Y Lima</div>");
         sb.AppendLine("</body></html>");
-
         return sb.ToString();
     }
+    
 }
 
 public class ErrorSemantico : Exception
@@ -57,14 +65,7 @@ public class ErrorSemantico : Exception
     {
         get
         {
-            Error.TablaGlobalErrores.Add(new FilaTablaErrores
-            {
-                No = Error.TablaGlobalErrores.Count + 1,
-                Descripcion = MensajeError,
-                Linea = LineaColumna.Line,
-                Columna = LineaColumna.Column,
-                Tipo = "Semántico"
-            });
+            Error.AgregarErrores(MensajeError, LineaColumna.Line, LineaColumna.Column, "Semántico");
             return $"Semantico: {MensajeError} En línea: {LineaColumna.Line}, Columna: {LineaColumna.Column}";
         }
     }
@@ -74,14 +75,7 @@ public class ErrorLexico : BaseErrorListener, IAntlrErrorListener<int>
 {
     public void SyntaxError(TextWriter output, IRecognizer recognizer, int offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
     {
-        Error.TablaGlobalErrores.Add(new FilaTablaErrores
-        {
-            No = Error.TablaGlobalErrores.Count + 1,
-            Descripcion = msg,
-            Linea = line,
-            Columna = charPositionInLine,
-            Tipo = "Léxico"
-        });
+        Error.AgregarErrores(msg, line, charPositionInLine, "Léxico");
         throw new ParseCanceledException($"Error Léxico En Línea: '{line}', Columna: '{charPositionInLine}': {msg}.");
     }
 }
@@ -90,14 +84,7 @@ public class ErrorSintactico : BaseErrorListener
 {
     public override void SyntaxError(TextWriter output, IRecognizer recognizer, IToken offendingSymbol, int line, int charPositionInLine, string msg, RecognitionException e)
     {
-        Error.TablaGlobalErrores.Add(new FilaTablaErrores
-        {
-            No = Error.TablaGlobalErrores.Count + 1,
-            Descripcion = msg,
-            Linea = line,
-            Columna = charPositionInLine,
-            Tipo = "Sintáctico"
-        });
+        Error.AgregarErrores(msg, line, charPositionInLine, "Sintáctico");
         throw new ParseCanceledException($"Error Sintáctico En Línea: '{line}', Columna: '{charPositionInLine}': {msg}.");
     }
 }

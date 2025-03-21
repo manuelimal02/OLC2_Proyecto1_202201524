@@ -1,5 +1,4 @@
 using static ManejoValorWrappper;
-using System.Globalization;
 using System.Text;
 public class Entorno
 {

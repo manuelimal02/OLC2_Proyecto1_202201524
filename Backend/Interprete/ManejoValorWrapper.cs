@@ -1,6 +1,5 @@
 using System.Globalization;
 public class ManejoValorWrappper{
-    // ObtenerTipo
     public static string ObtenerTipo(ValorWrapper valor)
     {
         return valor switch
@@ -68,12 +67,7 @@ public class ManejoValorWrappper{
 
     public static bool VerificarTipoPrimitivo(string tipo)
     {
-        return tipo == "int" 
-        || tipo == "float64" 
-        || tipo == "string" 
-        || tipo == "bool" 
-        || tipo == "rune"
-        ;
+        return tipo == "int" || tipo == "float64" || tipo == "string" || tipo == "bool" || tipo == "rune";
     }
 
     public static string ObtenerTipoSimbolo(ValorWrapper valor)

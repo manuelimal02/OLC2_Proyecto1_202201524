@@ -1,4 +1,5 @@
 using Analizador;
+using static ManejoValorWrappper;
 
 public class FuncionForanea : Invocable
 {
@@ -73,21 +74,5 @@ public class FuncionForanea : Invocable
         visitor.EntornoActual = EntornoDespuesDeLlamada;
         return new ValorVoid();
 
-    }
-
-     private string ObtenerTipo(ValorWrapper valor)
-    {
-        return valor switch
-        {
-            ValorInt _ => "int",
-            ValorFloat64 _ => "float64",
-            ValorString _ => "string",
-            ValorBoolean _ => "bool",
-            ValorRune _ => "rune",
-            ValorSlice Arreglo => Arreglo.Tipo,
-            ValorStruct Struct => Struct.NombreStruct,
-            ValorVoid _ => "void",
-            _ => throw new ArgumentException("Tipo de valor no soportado")
-        };
     }
 }
